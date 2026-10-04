@@ -1,0 +1,330 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// -----------------------------------------------------------------------------
+// Users & Authentication
+// Role: ADMIN | STAFF | KITCHEN | CUSTOMER
+// -----------------------------------------------------------------------------
+model User {
+  id           String     @id @default(cuid())
+  name         String
+  email        String     @unique
+  passwordHash String
+  phone        String?
+  role         String     @default("STAFF") // ADMIN | STAFF | KITCHEN | CUSTOMER
+  createdAt    DateTime   @default(now())
+  customer     Customer?
+  orders       Order[]
+  auditLogs    AuditLog[]
+}
+
+// -----------------------------------------------------------------------------
+// Customers, Memberships, Wallet & Khata Ledger
+// -----------------------------------------------------------------------------
+model Customer {
+  id             String               @id @default(cuid())
+  userId         String?              @unique
+  user           User?                @relation(fields: [userId], references: [id])
+  name           String
+  phone          String               @unique
+  email          String?
+  walletBalance  Int                  @default(0) // in paise (₹1 = 100 paise)
+  creditBalance  Int                  @default(0) // amount owed by customer (khata) in paise
+  creditLimit    Int                  @default(500000) // default ₹5,000 in paise
+  loyaltyPoints  Int                  @default(0)
+  birthday       DateTime?
+  notes          String?
+  createdAt      DateTime             @default(now())
+  memberships    CustomerMembership[]
+  sessions       Session[]
+  reservations   Reservation[]
+  orders         Order[]
+  bills          Bill[]
+  payments       Payment[]
+  ledgerEntries  LedgerEntry[]
+}
+
+model MembershipPlan {
+  id              String               @id @default(cuid())
+  name            String
+  priceInPaise    Int
+  durationDays    Int
+  discountPercent Float
+  includedMinutes Int                  @default(0)
+  active          Boolean              @default(true)
+  memberships     CustomerMembership[]
+}
+
+model CustomerMembership {
+  id          String         @id @default(cuid())
+  customerId  String
+  customer    Customer       @relation(fields: [customerId], references: [id])
+  planId      String
+  plan        MembershipPlan @relation(fields: [planId], references: [id])
+  startsAt    DateTime
+  endsAt      DateTime
+  minutesUsed Int            @default(0)
+}
+
+// -----------------------------------------------------------------------------
+// Tables & Dynamic Pricing Configuration
+// TableType: POOL | SNOOKER | CAROM
+// TableStatus: AVAILABLE | OCCUPIED | RESERVED | MAINTENANCE
+// BillingMode: TIME | FRAME | PACKAGE
+// -----------------------------------------------------------------------------
+model GameTable {
+  id           String        @id @default(cuid())
+  name         String
+  type         String        // POOL | SNOOKER | CAROM
+  status       String        @default("AVAILABLE") // AVAILABLE | OCCUPIED | RESERVED | MAINTENANCE
+  rateCardId   String
+  rateCard     RateCard      @relation(fields: [rateCardId], references: [id])
+  sortOrder    Int           @default(0)
+  sessions     Session[]
+  reservations Reservation[]
+  orders       Order[]
+}
+
+model RateCard {
+  id                 String       @id @default(cuid())
+  name               String
+  billingMode        String       @default("TIME") // TIME | FRAME
+  framePricePaise    Int?
+  graceMinutes       Int          @default(5)
+  minChargeMinutes   Int          @default(15)
+  overtimeMultiplier Float        @default(1.0)
+  bands              RateBand[]
+  tables             GameTable[]
+}
+
+model RateBand {
+  id               String   @id @default(cuid())
+  rateCardId       String
+  rateCard         RateCard @relation(fields: [rateCardId], references: [id], onDelete: Cascade)
+  daysOfWeek       String   // e.g. "1,2,3,4,5" (1=Mon ... 7=Sun)
+  startMinute      Int      // 0 - 1439
+  endMinute        Int      // 1 - 1440
+  ratePerHourPaise Int
+  label            String
+}
+
+model PackageDeal {
+  id          String      @id @default(cuid())
+  name        String
+  billingMode String      // TIME | FRAME
+  quantity    Int         // hours or frames count
+  pricePaise  Int
+  tableType   String      // POOL | SNOOKER | CAROM
+  active      Boolean     @default(true)
+  sessions    Session[]
+}
+
+// -----------------------------------------------------------------------------
+// Online Booking & Live Table Sessions
+// ReservationStatus: PENDING | CONFIRMED | CHECKED_IN | COMPLETED | CANCELLED | NO_SHOW
+// SessionStatus: RUNNING | PAUSED | ENDED
+// -----------------------------------------------------------------------------
+model Reservation {
+  id           String    @id @default(cuid())
+  code         String    @unique // e.g. "CQ-8F3K2"
+  customerId   String?
+  customer     Customer? @relation(fields: [customerId], references: [id])
+  guestName    String
+  guestPhone   String
+  tableId      String?
+  table        GameTable? @relation(fields: [tableId], references: [id])
+  tableType    String    // POOL | SNOOKER | CAROM
+  startsAt     DateTime
+  endsAt       DateTime
+  partySize    Int       @default(2)
+  status       String    @default("PENDING") // PENDING | CONFIRMED | CHECKED_IN | COMPLETED | CANCELLED | NO_SHOW
+  depositPaise Int       @default(0)
+  depositPaid  Boolean   @default(false)
+  notes        String?
+  createdAt    DateTime  @default(now())
+  sessions     Session[]
+}
+
+model Session {
+  id               String         @id @default(cuid())
+  tableId          String
+  table            GameTable      @relation(fields: [tableId], references: [id])
+  customerId       String?
+  customer         Customer?      @relation(fields: [customerId], references: [id])
+  reservationId    String?
+  reservation      Reservation?   @relation(fields: [reservationId], references: [id])
+  status           String         @default("RUNNING") // RUNNING | PAUSED | ENDED
+  billingMode      String         @default("TIME") // TIME | FRAME | PACKAGE
+  startedAt        DateTime       @default(now())
+  endedAt          DateTime?
+  packageDealId    String?
+  packageDeal      PackageDeal?   @relation(fields: [packageDealId], references: [id])
+  framesPlayed     Int            @default(0)
+  rateCardSnapshot String         // JSON serialized rate card + bands snapshot
+  createdAt        DateTime       @default(now())
+  pauses           SessionPause[]
+  orders           Order[]
+  bill             Bill?
+}
+
+model SessionPause {
+  id        String    @id @default(cuid())
+  sessionId String
+  session   Session   @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  pausedAt  DateTime  @default(now())
+  resumedAt DateTime?
+}
+
+// -----------------------------------------------------------------------------
+// Cafe F&B, Orders, POS & KOT
+// Station: KITCHEN | BAR
+// OrderType: DINE_IN_TABLE | TAKEAWAY
+// OrderStatus: OPEN | SENT | PREPARING | READY | SERVED | CANCELLED
+// KotStatus: NEW | PREPARING | READY | SERVED
+// -----------------------------------------------------------------------------
+model MenuCategory {
+  id        String     @id @default(cuid())
+  name      String
+  sortOrder Int        @default(0)
+  station   String     @default("KITCHEN") // KITCHEN | BAR
+  items     MenuItem[]
+}
+
+model MenuItem {
+  id         String       @id @default(cuid())
+  categoryId String
+  category   MenuCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  name       String
+  pricePaise Int
+  taxPercent Float        @default(5.0)
+  available  Boolean      @default(true)
+  imageEmoji String?
+  orderItems OrderItem[]
+}
+
+model Order {
+  id          String      @id @default(cuid())
+  sessionId   String?
+  session     Session?    @relation(fields: [sessionId], references: [id])
+  tableId     String?
+  table       GameTable?  @relation(fields: [tableId], references: [id])
+  customerId  String?
+  customer    Customer?   @relation(fields: [customerId], references: [id])
+  type        String      @default("DINE_IN_TABLE") // DINE_IN_TABLE | TAKEAWAY
+  status      String      @default("OPEN") // OPEN | SENT | PREPARING | READY | SERVED | CANCELLED
+  createdById String
+  createdBy   User        @relation(fields: [createdById], references: [id])
+  createdAt   DateTime    @default(now())
+  items       OrderItem[]
+}
+
+model OrderItem {
+  id                   String   @id @default(cuid())
+  orderId              String
+  order                Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  menuItemId           String
+  menuItem             MenuItem @relation(fields: [menuItemId], references: [id])
+  nameSnapshot         String
+  unitPricePaise       Int
+  quantity             Int      @default(1)
+  notes                String?
+  kotStatus            String   @default("NEW") // NEW | PREPARING | READY | SERVED
+  assignedToCustomerId String?
+}
+
+// -----------------------------------------------------------------------------
+// Billing, Splits, Payments & Khata
+// BillStatus: OPEN | PAID | PARTIAL | CREDIT
+// SplitMode: NONE | EVEN | BY_ITEM | LOSER_PAYS
+// PaymentMethod: CASH | UPI | CARD | WALLET | CREDIT
+// LedgerEntryType: CREDIT_GIVEN | CREDIT_REPAID | WALLET_TOPUP | WALLET_SPEND | LOYALTY_EARNED | LOYALTY_REDEEMED
+// -----------------------------------------------------------------------------
+model Bill {
+  id            String        @id @default(cuid())
+  sessionId     String?       @unique
+  session       Session?      @relation(fields: [sessionId], references: [id])
+  customerId    String?
+  customer      Customer?     @relation(fields: [customerId], references: [id])
+  subtotalPaise Int
+  taxPaise      Int
+  discountPaise Int           @default(0)
+  totalPaise    Int
+  status        String        @default("OPEN") // OPEN | PAID | PARTIAL | CREDIT
+  splitMode     String        @default("NONE") // NONE | EVEN | BY_ITEM | LOSER_PAYS
+  createdAt     DateTime      @default(now())
+  closedAt      DateTime?
+  payments      Payment[]
+  ledgerEntries LedgerEntry[]
+}
+
+model Payment {
+  id          String   @id @default(cuid())
+  billId      String
+  bill        Bill     @relation(fields: [billId], references: [id], onDelete: Cascade)
+  customerId  String?
+  customer    Customer? @relation(fields: [customerId], references: [id])
+  method      String   // CASH | UPI | CARD | WALLET | CREDIT
+  amountPaise Int
+  reference   String?
+  label       String?  // e.g. "Player 2 share", "Table Time Share"
+  createdAt   DateTime @default(now())
+}
+
+model LedgerEntry {
+  id          String   @id @default(cuid())
+  customerId  String
+  customer    Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  type        String   // CREDIT_GIVEN | CREDIT_REPAID | WALLET_TOPUP | WALLET_SPEND | LOYALTY_EARNED | LOYALTY_REDEEMED
+  amountPaise Int
+  billId      String?
+  bill        Bill?    @relation(fields: [billId], references: [id])
+  note        String?
+  createdAt   DateTime @default(now())
+}
+
+// -----------------------------------------------------------------------------
+// System Settings, Notifications, Audit Log & Day Close
+// -----------------------------------------------------------------------------
+model Setting {
+  key   String @id
+  value String // JSON string
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  to        String
+  channel   String   // SMS | WHATSAPP
+  body      String
+  createdAt DateTime @default(now())
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  action    String
+  entity    String
+  entityId  String
+  meta      String?  // JSON string
+  createdAt DateTime @default(now())
+}
+
+model DayClose {
+  id               String   @id @default(cuid())
+  closedDate       DateTime @default(now())
+  openingCashPaise Int
+  cashCollected    Int
+  upiCollected     Int
+  cardCollected    Int
+  creditGiven      Int
+  expectedCash     Int
+  actualCash       Int?
+  notes            String?
+  closedByUserId   String
+}

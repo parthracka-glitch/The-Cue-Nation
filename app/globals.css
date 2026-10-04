@@ -2,26 +2,82 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@media (prefers-color-scheme: dark) {
+@layer base {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: 153 50% 4%;
+    --foreground: 150 20% 98%;
+
+    --card: 153 45% 7%;
+    --card-foreground: 150 20% 98%;
+
+    --popover: 153 45% 7%;
+    --popover-foreground: 150 20% 98%;
+
+    --primary: 152 65% 38%;
+    --primary-foreground: 150 20% 98%;
+
+    --secondary: 153 30% 14%;
+    --secondary-foreground: 150 20% 92%;
+
+    --muted: 153 25% 12%;
+    --muted-foreground: 150 15% 65%;
+
+    --accent: 43 74% 49%;
+    --accent-foreground: 45 90% 10%;
+
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 153 30% 15%;
+    --input: 153 30% 15%;
+    --ring: 152 65% 38%;
+
+    --radius: 0.75rem;
   }
 }
 
 body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  color: hsl(var(--foreground));
+  background-color: hsl(var(--background));
+  font-feature-settings: "rlig" 1, "calt" 1;
+  min-height: 100vh;
 }
 
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
+/* Custom scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: hsl(var(--background));
+}
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--border));
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--primary));
+}
+
+/* 80mm Thermal Receipt Print Stylesheet */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  #printable-receipt,
+  #printable-receipt * {
+    visibility: visible;
+  }
+  #printable-receipt {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 80mm;
+    margin: 0;
+    padding: 8px;
+    font-family: monospace;
+    font-size: 12px;
+    color: #000000 !important;
+    background: #ffffff !important;
   }
 }
