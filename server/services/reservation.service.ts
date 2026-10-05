@@ -91,14 +91,19 @@ export class ReservationService {
 
       slots.push({
         hour,
+        time: `${String(hour).padStart(2, "0")}:00`,
         timeFormatted: `${String(hour).padStart(2, "0")}:00`,
         startTime: slotStartTime.toISOString(),
         endTime: slotEndTime.toISOString(),
         availableCount,
+        availableTablesCount: availableCount,
+        totalTablesCount: tables.length,
         isAvailable: availableCount > 0,
+        estimatedPricePaise: priceResult.totalPaise,
         estimatedTotalPaise: priceResult.totalPaise,
-        depositPaise: Math.min(priceResult.totalPaise, 50000), // Standard deposit ₹500
+        depositPaise: Math.round(priceResult.totalPaise * 0.2), // Standard 20% deposit
         isHappyHour: isHappyHourSlot,
+        breakdown: priceResult.breakdown || [],
       });
     }
 

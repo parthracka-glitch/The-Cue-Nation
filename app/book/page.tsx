@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { PublicHeader } from "@/components/layout/public-header";
 import { PublicFooter } from "@/components/layout/public-footer";
@@ -19,28 +20,39 @@ import {
   Download,
   ArrowRight,
   ArrowLeft,
+  Calendar,
+  Sparkles,
 } from "lucide-react";
 
 interface SlotItem {
-  time: string;
+  time?: string;
+  timeFormatted?: string;
   startTime: string;
   endTime: string;
-  availableTablesCount: number;
-  totalTablesCount: number;
+  availableTablesCount?: number;
+  availableCount?: number;
+  totalTablesCount?: number;
   isAvailable: boolean;
-  estimatedPricePaise: number;
-  breakdown: Array<{ label: string; minutes: number; amountPaise: number }>;
+  estimatedPricePaise?: number;
+  estimatedTotalPaise?: number;
+  depositPaise?: number;
+  isHappyHour?: boolean;
+  breakdown?: Array<{ label: string; minutes: number; amountPaise: number }>;
 }
 
-export default function BookingPage() {
+function BookingPageContent() {
   const { data: session } = useSession();
+  const searchParams = useSearchParams();
+  const paramType = searchParams.get("type")?.toUpperCase();
+  const initialTableType: "POOL" | "SNOOKER" | "CAROM" =
+    paramType === "SNOOKER" || paramType === "CAROM" ? paramType : "POOL";
 
   // Wizard Step: 1 | 2 | 3 | 4 | 5
   const [currentStep, setCurrentStep] = useState(1);
 
   // Step 1: Table type, Date, Party Size
   const todayStr = new Date().toISOString().split("T")[0];
-  const [tableType, setTableType] = useState<"POOL" | "SNOOKER" | "CAROM">("POOL");
+  const [tableType, setTableType] = useState<"POOL" | "SNOOKER" | "CAROM">(initialTableType);
   const [bookingDate, setBookingDate] = useState<string>(todayStr);
   const [partySize, setPartySize] = useState<number>(2);
 
@@ -105,7 +117,7 @@ export default function BookingPage() {
   }, [tableType, bookingDate, durationHours]);
 
   const depositPaise = selectedSlot
-    ? Math.round(selectedSlot.estimatedPricePaise * 0.2)
+    ? selectedSlot.depositPaise || Math.round((selectedSlot.estimatedPricePaise || selectedSlot.estimatedTotalPaise || 0) * 0.2)
     : 0;
 
   // Process Mock Deposit Payment
@@ -339,10 +351,12 @@ export default function BookingPage() {
 
                 <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2 max-h-[300px] overflow-y-auto p-1">
                   {slots.map((slot) => {
-                    const isSelected = selectedSlot?.time === slot.time;
+                    const slotLabel = slot.time || slot.timeFormatted || `${slot.startTime.split("T")[1]?.slice(0, 5) || "Slot"}`;
+                    const isSelected = selectedSlot?.startTime === slot.startTime || selectedSlot?.time === slotLabel;
+                    const freeCount = slot.availableTablesCount ?? slot.availableCount ?? 0;
                     return (
                       <button
-                        key={slot.time}
+                        key={slot.startTime || slotLabel}
                         type="button"
                         disabled={!slot.isAvailable}
                         onClick={() => setSelectedSlot(slot)}
@@ -354,11 +368,11 @@ export default function BookingPage() {
                             : "border-border bg-secondary/40 hover:border-emerald-700 text-foreground"
                         }`}
                       >
-                        <div className="text-sm font-semibold">{slot.time}</div>
+                        <div className="text-sm font-semibold">{slotLabel}</div>
                         <div className="text-[10px] mt-0.5">
                           {slot.isAvailable ? (
                             <span className="text-emerald-400 font-medium">
-                              {slot.availableTablesCount} free
+                              {freeCount} free
                             </span>
                           ) : (
                             <span className="text-red-400">Full</span>
@@ -375,15 +389,15 @@ export default function BookingPage() {
                 <div className="p-4 rounded-xl border border-emerald-900/60 bg-emerald-950/20 space-y-3">
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-semibold uppercase tracking-wider text-emerald-400">
-                      Pricing Estimate ({selectedSlot.time} for {durationHours}h)
+                      Pricing Estimate ({selectedSlot.time || selectedSlot.timeFormatted} for {durationHours}h)
                     </span>
                     <span className="text-lg font-bold text-white">
-                      {formatINR(selectedSlot.estimatedPricePaise)}
+                      {formatINR(selectedSlot.estimatedPricePaise || selectedSlot.estimatedTotalPaise || 0)}
                     </span>
                   </div>
 
                   <div className="space-y-1 pt-1 border-t border-emerald-900/40 text-xs">
-                    {selectedSlot.breakdown.map((item, idx) => (
+                    {(selectedSlot.breakdown || []).map((item, idx) => (
                       <div key={idx} className="flex justify-between text-muted-foreground">
                         <span>
                           {item.label} ({item.minutes} mins)
@@ -395,7 +409,7 @@ export default function BookingPage() {
                     ))}
                     <div className="flex justify-between pt-2 border-t border-border font-semibold text-emerald-300">
                       <span>Required 20% Deposit (Mock Gateway)</span>
-                      <span>{formatINR(depositPaise)}</span>
+                      <span>{formatINR(selectedSlot.depositPaise || depositPaise)}</span>
                     </div>
                   </div>
                 </div>
@@ -687,3 +701,19 @@ export default function BookingPage() {
     </div>
   );
 }
+
+export default function BookingPage() {
+  return (
+    <React.Suspense
+      fallback={
+        <div className="min-h-screen bg-billiard-950 flex items-center justify-center text-muted-foreground">
+          <Loader2 className="h-8 w-8 animate-spin text-emerald-400 mr-2" />
+          <span>Loading CueClub Booking Engine...</span>
+        </div>
+      }
+    >
+      <BookingPageContent />
+    </React.Suspense>
+  );
+}
+

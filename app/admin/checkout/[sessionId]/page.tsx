@@ -85,6 +85,9 @@ export default function CheckoutPage() {
         <Loader2 className="h-8 w-8 animate-spin text-emerald-400 mx-auto mb-2" />
         <span className="text-xs text-muted-foreground">Generating session folio...</span>
       </div>
+    );
+  }
+
   if (data?.error || !data?.totals) {
     return (
       <div className="p-8 rounded-xl border border-destructive/40 bg-destructive/10 text-center max-w-lg mx-auto my-16">

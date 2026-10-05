@@ -24,6 +24,7 @@ import {
   FileText,
   Loader2,
   CheckCircle2,
+  AlertTriangle,
 } from "lucide-react";
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
@@ -52,6 +53,7 @@ export default function CustomerProfilePage() {
         Loading customer record...
       </div>
     );
+  }
   if (data?.error || !data?.customer) {
     return (
       <div className="p-8 rounded-xl border border-destructive/40 bg-destructive/10 text-center max-w-lg mx-auto my-16">
