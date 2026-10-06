@@ -186,6 +186,7 @@ export default function CheckoutPage() {
           payments: paymentPayload,
           totals: {
             ...totals,
+            taxPaise: totals.taxPaise ?? totals.totalTaxPaise ?? 0,
             totalPaise: finalTotalPaise,
           },
         }),

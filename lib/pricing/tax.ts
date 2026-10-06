@@ -58,6 +58,7 @@ export interface BillTotalsResult {
   tableTaxPaise: number;
   cafeTaxPaise: number;
   totalTaxPaise: number;
+  taxPaise: number;
   totalPaise: number;
 }
 
@@ -99,6 +100,7 @@ export function computeBillTotals({
     tableTaxPaise,
     cafeTaxPaise,
     totalTaxPaise,
+    taxPaise: totalTaxPaise,
     totalPaise,
   };
 }

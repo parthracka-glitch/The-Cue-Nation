@@ -215,7 +215,7 @@ export class BillingService {
           status: "PAID",
           subtotalPaise: totals.subtotalPaise,
           discountPaise: (totals.discountPaise || 0) + (manualDiscountPaise || 0),
-          taxPaise: totals.taxPaise,
+          taxPaise: totals.taxPaise ?? (totals as any).totalTaxPaise ?? 0,
           totalPaise: totals.totalPaise,
           splitMode,
           closedAt: now,
