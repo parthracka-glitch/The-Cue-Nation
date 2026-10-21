@@ -168,14 +168,24 @@ export interface Order {
 
 export interface Bill {
   id: string;
+  bill_number?: string;
   session_id: string;
   time_charge: number;
   food_charge: number;
+  discount_amount?: number;
+  tax_amount?: number;
   total: number;
+  amount_paid?: number;
+  balance_due?: number;
   paid: boolean;
   pay_mode?: PayMode | null;
   paid_at?: string | null;
+  created_at?: string;
   session?: Session;
+  booking?: Booking;
+  table?: GameTable;
+  staff_id?: string;
+  notes?: string;
 }
 
 export interface Expense {

@@ -6,7 +6,8 @@ import { AdminNav } from "@/components/admin/AdminNav";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { venueStore } from "@/lib/store/venueStore";
-import { Session, GameTable, Booking } from "@/types/database";
+import { Session, GameTable, Booking, Bill } from "@/types/database";
+import { ProfessionalBillModal } from "@/components/billing/ProfessionalBillModal";
 import { formatTimeIST } from "@/lib/time";
 import {
   Clock,
@@ -28,6 +29,8 @@ export default function AdminSessionsPage() {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [now, setNow] = useState(Date.now());
+  const [selectedBill, setSelectedBill] = useState<Bill | null>(null);
+  const [isBillModalOpen, setIsBillModalOpen] = useState(false);
 
   const reloadData = () => {
     setSessions(venueStore.getSessions());
@@ -54,7 +57,12 @@ export default function AdminSessionsPage() {
 
   const handleEndSession = (sessionId: string) => {
     if (confirm("Are you sure you want to conclude this session as Admin? This will finalize the bill.")) {
-      venueStore.endSession(sessionId);
+      const res = venueStore.endSession(sessionId);
+      if (res.success && res.billId) {
+        const bill = res.bill || venueStore.getBills().find((b) => b.id === res.billId) || null;
+        setSelectedBill(bill);
+        setIsBillModalOpen(true);
+      }
     }
   };
 
@@ -178,6 +186,17 @@ export default function AdminSessionsPage() {
             })
           )}
         </div>
+
+        {/* PROFESSIONAL BILL MODAL */}
+        <ProfessionalBillModal
+          isOpen={isBillModalOpen}
+          onClose={() => {
+            setIsBillModalOpen(false);
+            setSelectedBill(null);
+          }}
+          bill={selectedBill}
+          onPaymentSettled={reloadData}
+        />
       </div>
     </div>
   );

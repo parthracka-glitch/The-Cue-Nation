@@ -2,10 +2,11 @@
 
 import React, { useState, useEffect } from "react";
 import { venueStore } from "@/lib/store/venueStore";
-import { GameTable, Session, Booking, Order } from "@/types/database";
+import { GameTable, Session, Booking, Order, Bill } from "@/types/database";
 import { Button } from "@/components/ui/Button";
 import { StatusBadge } from "@/components/ui/Badge";
 import { Modal } from "@/components/ui/Modal";
+import { ProfessionalBillModal } from "@/components/billing/ProfessionalBillModal";
 import { useSessionTimer } from "@/lib/realtime/useSessionTimer";
 import Link from "next/link";
 import clsx from "clsx";
@@ -210,6 +211,8 @@ export default function StaffFloorPage() {
 
   const [extraTimeSession, setExtraTimeSession] = useState<Session | null>(null);
   const [endSessionItem, setEndSessionItem] = useState<Session | null>(null);
+  const [billModalOpen, setBillModalOpen] = useState(false);
+  const [activeBill, setActiveBill] = useState<Bill | null>(null);
 
   // Walk-in modal state
   const [isWalkInModalOpen, setIsWalkInModalOpen] = useState(false);
@@ -303,10 +306,11 @@ export default function StaffFloorPage() {
   const handleEndSession = () => {
     if (!endSessionItem) return;
     const res = venueStore.endSession(endSessionItem.id);
-    if (res.success) {
+    if (res.success && res.billId) {
       setEndSessionItem(null);
-      // Navigate to billing
-      window.location.href = `/staff/billing?billId=${res.billId}`;
+      const generatedBill = res.bill || venueStore.getBills().find((b) => b.id === res.billId) || null;
+      setActiveBill(generatedBill);
+      setBillModalOpen(true);
     }
   };
 
@@ -796,6 +800,17 @@ export default function StaffFloorPage() {
             </div>
           </form>
         </Modal>
+
+        {/* PROFESSIONAL BILL / INVOICE PREVIEW & ACTIONS MODAL */}
+        <ProfessionalBillModal
+          isOpen={billModalOpen}
+          onClose={() => {
+            setBillModalOpen(false);
+            setActiveBill(null);
+          }}
+          bill={activeBill}
+          onPaymentSettled={reloadData}
+        />
       </div>
     </div>
     </div>

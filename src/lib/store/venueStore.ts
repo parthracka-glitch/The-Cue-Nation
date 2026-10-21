@@ -608,11 +608,18 @@ class VenueStore {
     return { success: true };
   }
 
-  endSession(sessionId: string): { success: boolean; billId?: string; error?: string } {
-    const session = this.sessions.find((s) => s.id === sessionId && !s.ended_at);
-    if (!session) return { success: false, error: "Active session not found" };
+  endSession(sessionId: string): { success: boolean; billId?: string; bill?: Bill; error?: string } {
+    const session = this.sessions.find((s) => s.id === sessionId);
+    if (!session) return { success: false, error: "Session not found" };
 
-    session.ended_at = new Date().toISOString();
+    // Idempotent return of existing bill if session already ended
+    const existingBill = this.bills.find((b) => b.session_id === sessionId);
+    if (session.ended_at && existingBill) {
+      return { success: true, billId: existingBill.id, bill: existingBill };
+    }
+
+    const endedAt = new Date().toISOString();
+    session.ended_at = endedAt;
 
     const table = this.tables.find((t) => t.id === session.table_id);
     if (table) {
@@ -636,20 +643,37 @@ class VenueStore {
     });
 
     const billId = `bill-${Date.now()}`;
+    const year = new Date().getFullYear();
+    const sequence = String(this.bills.length + 1).padStart(5, "0");
+    const billNumber = `QN-${year}-${sequence}`;
+
+    const subtotal = session.time_charge + foodTotal;
+    const taxAmount = Math.round(subtotal * 0.05);
+    const total = subtotal + taxAmount;
+
     const newBill: Bill = {
       id: billId,
+      bill_number: billNumber,
       session_id: sessionId,
       time_charge: session.time_charge,
       food_charge: foodTotal,
-      total: session.time_charge + foodTotal,
+      tax_amount: taxAmount,
+      discount_amount: 0,
+      total,
+      amount_paid: 0,
+      balance_due: total,
       paid: false,
       pay_mode: null,
       paid_at: null,
+      created_at: endedAt,
+      session,
+      booking,
+      table,
     };
 
     this.bills.push(newBill);
     this.saveToStorage();
-    return { success: true, billId };
+    return { success: true, billId, bill: newBill };
   }
 
   markBillPaid(billId: string, payMode: "cash" | "upi" | "card") {
@@ -657,6 +681,8 @@ class VenueStore {
     if (bill) {
       bill.paid = true;
       bill.pay_mode = payMode;
+      bill.amount_paid = bill.total;
+      bill.balance_due = 0;
       bill.paid_at = new Date().toISOString();
       this.saveToStorage();
     }
