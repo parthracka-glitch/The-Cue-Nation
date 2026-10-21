@@ -1,0 +1,199 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* CUE-NATION Master Design Tokens */
+  --felt: #0A5551;
+  --felt-dark: #063B38;
+  --brass: #C5A059;
+  --brass-dark: #9A7B38;
+  --charcoal: #121615;
+  --charcoal-card: #18201E;
+  --ivory: #F6EFDF;
+  --ink: #070909;
+  --stone: #8A857B;
+  --radius: 14px;
+
+  /* Table Status Palette */
+  --table-free: #2FA39A;
+  --table-booked: #D9A441;
+  --table-running: #C5A059;
+  --table-maintenance: #7A7F7E;
+
+  /* Theme Semantic Variables */
+  --background: #F6EFDF;
+  --foreground: #070909;
+  --card: #FBF7EC;
+  --card-foreground: #070909;
+  --primary: #6D5330;          /* Smoked Bronze */
+  --primary-foreground: #EDDFC2;
+  --secondary: #0A5551;        /* Baize Teal / Felt */
+  --secondary-foreground: #F6EFDF;
+  --muted: #EDDFC2;
+  --muted-foreground: #5C5446;
+  --accent: #0A5551;
+  --accent-foreground: #F6EFDF;
+  --popover: #FBF7EC;
+  --popover-foreground: #070909;
+  --border: rgba(7, 9, 9, 0.12);
+  --input: rgba(7, 9, 9, 0.15);
+  --ring: #C5A059;
+  --destructive: #A3303E;
+  --destructive-foreground: #FFFFFF;
+}
+
+.dark {
+  /* Dark Luxury Gentleman's Lounge */
+  --background: #070909;
+  --foreground: #F6EFDF;
+  --card: #121615;
+  --card-foreground: #F6EFDF;
+  --primary: #C5A059;          /* Brass Glow */
+  --primary-foreground: #070909;
+  --secondary: #18201E;
+  --secondary-foreground: #F6EFDF;
+  --muted: #18201E;
+  --muted-foreground: #8A857B;
+  --accent: #2FA39A;
+  --accent-foreground: #070909;
+  --popover: #121615;
+  --popover-foreground: #F6EFDF;
+  --border: rgba(197, 160, 89, 0.15);
+  --input: rgba(197, 160, 89, 0.20);
+  --ring: #C5A059;
+  --destructive: #E27D88;
+  --destructive-foreground: #070909;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-inter), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Tabular digits for timers, currencies and counters */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Custom smooth luxury scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: rgba(7, 9, 9, 0.05);
+}
+::-webkit-scrollbar-thumb {
+  background: #6D5330;
+  border-radius: 4px;
+}
+.dark ::-webkit-scrollbar-thumb {
+  background: #C5A059;
+}
+
+/* Parlour Felt Texture on Baize elements */
+.felt-texture {
+  background-image: radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+  background-size: 8px 8px;
+}
+
+/* Atmospheric Glow Utilities */
+.brass-glow {
+  box-shadow: 0 0 25px rgba(197, 160, 89, 0.35);
+}
+
+.felt-glow {
+  box-shadow: 0 0 30px rgba(10, 85, 81, 0.40);
+}
+
+/* Background Ambient Drift & Floating Animation */
+@keyframes ambientDrift {
+  0% {
+    transform: scale(1.06) translate3d(0, 0, 0);
+  }
+  33% {
+    transform: scale(1.13) translate3d(-1.2%, -0.8%, 0);
+  }
+  66% {
+    transform: scale(1.10) translate3d(1.2%, -1.2%, 0);
+  }
+  100% {
+    transform: scale(1.06) translate3d(0, 0, 0);
+  }
+}
+
+.animate-ambient-drift {
+  animation: ambientDrift 28s ease-in-out infinite;
+  will-change: transform;
+}
+
+@keyframes lampPulse {
+  0%, 100% {
+    opacity: 0.25;
+    transform: translateX(-50%) scale(1);
+  }
+  50% {
+    opacity: 0.42;
+    transform: translateX(-50%) scale(1.12);
+  }
+}
+
+.animate-lamp-pulse {
+  animation: lampPulse 10s ease-in-out infinite;
+}
+
+/* Touch manipulation optimization - eliminate 300ms tap delay on mobile */
+a, button, input, select, textarea, [role="button"] {
+  touch-action: manipulation;
+}
+
+/* Prevent unwanted iOS auto-zoom when tapping inputs on iPhone/iPad */
+@media screen and (max-width: 767px) {
+  input, select, textarea {
+    font-size: 16px !important;
+  }
+}
+
+/* Safe Area Inset Utility Classes for Notched Devices */
+.pt-safe {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+.pl-safe {
+  padding-left: env(safe-area-inset-left, 0px);
+}
+.pr-safe {
+  padding-right: env(safe-area-inset-right, 0px);
+}
+
+/* Utility to hide scrollbar while preserving horizontal swipe gesture on iOS/Android */
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Thermal receipt print layout */
+@media print {
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+  .print-only {
+    display: block !important;
+  }
+}
+
