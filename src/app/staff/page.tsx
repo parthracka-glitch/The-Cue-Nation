@@ -212,10 +212,13 @@ export default function StaffFloorPage() {
   const [endSessionItem, setEndSessionItem] = useState<Session | null>(null);
 
   // Walk-in modal state
+  const [isWalkInModalOpen, setIsWalkInModalOpen] = useState(false);
+  const [walkInDiscipline, setWalkInDiscipline] = useState<"pool" | "snooker">("pool");
   const [walkInTable, setWalkInTable] = useState<GameTable | null>(null);
   const [walkInName, setWalkInName] = useState("");
   const [walkInPhone, setWalkInPhone] = useState("");
   const [walkInMinutes, setWalkInMinutes] = useState(60);
+  const [walkInError, setWalkInError] = useState("");
 
   const reloadData = () => {
     setTables(venueStore.getTables());
@@ -229,6 +232,16 @@ export default function StaffFloorPage() {
     const unsub = venueStore.subscribe(reloadData);
     return unsub;
   }, []);
+
+  const handleOpenWalkIn = (discipline: "pool" | "snooker" = "pool", table: GameTable | null = null) => {
+    setWalkInDiscipline(table ? table.type : discipline);
+    setWalkInTable(table);
+    setWalkInName("");
+    setWalkInPhone("");
+    setWalkInMinutes(60);
+    setWalkInError("");
+    setIsWalkInModalOpen(true);
+  };
 
   // Quick PIN Auto-Allocate Submit
   const handleQuickPinSubmit = (e: React.FormEvent) => {
@@ -297,23 +310,41 @@ export default function StaffFloorPage() {
     }
   };
 
-  // Handle Walk-in submission
+  // Handle Walk-in submission with automated table allocation
   const handleCreateWalkIn = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!walkInTable) return;
+    setWalkInError("");
 
-    const hourlyRate = walkInTable.type === "snooker" ? 450 : 300;
+    let targetTable: GameTable | undefined = walkInTable || undefined;
+
+    // If no specific table was picked, auto-allocate from the 3 tables of the chosen discipline
+    if (!targetTable) {
+      const candidates = tables.filter((t) => t.type === walkInDiscipline && t.active);
+      targetTable = candidates.find((t) => {
+        const hasRunning = sessions.some((s) => s.table_id === t.id && !s.ended_at);
+        return t.status === "free" && !hasRunning;
+      });
+    }
+
+    if (!targetTable) {
+      setWalkInError(
+        `All 3 ${walkInDiscipline === "snooker" ? "Snooker" : "Pool"} tables are currently occupied. Cannot start walk-in session.`
+      );
+      return;
+    }
+
+    const hourlyRate = targetTable.type === "snooker" ? 450 : 300;
     const amount = Math.round((walkInMinutes / 60) * hourlyRate);
 
     const now = new Date();
     const end = new Date(now.getTime() + walkInMinutes * 60 * 1000);
 
     const { booking, pin } = venueStore.createBooking({
-      tableId: walkInTable.id,
+      tableId: targetTable.id,
       startISO: now.toISOString(),
       endISO: end.toISOString(),
       guestName: walkInName.trim() || "Walk-in Guest",
-      guestPhone: walkInPhone.trim() || "+919999999999",
+      guestPhone: walkInPhone.trim() || "+91 99999 99999",
       amount,
       source: "offline",
     });
@@ -321,6 +352,21 @@ export default function StaffFloorPage() {
     // Auto-start session for walk-in
     venueStore.startSessionWithPin(booking.booking_code, pin);
 
+    // Synchronize with backend API in background
+    fetch("/api/sessions", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        tableId: targetTable.id,
+        isWalkIn: true,
+      }),
+    }).catch(() => {});
+
+    setAllocationSuccess(
+      `✅ Walk-in started! Automatically allocated ${targetTable.name} for ${walkInName.trim() || "Walk-in Guest"}. Session timer is running.`
+    );
+
+    setIsWalkInModalOpen(false);
     setWalkInTable(null);
     setWalkInName("");
     setWalkInPhone("");
@@ -358,6 +404,15 @@ export default function StaffFloorPage() {
                 Combined POS Bills
               </Button>
             </Link>
+            <Button
+              variant="primary-dark"
+              size="sm"
+              onClick={() => handleOpenWalkIn("pool", null)}
+              className="gap-2 bg-baize hover:bg-baize-light text-cream font-bold shadow-sm"
+            >
+              <UserPlus className="w-4 h-4 text-cream" />
+              Walk-in Booking
+            </Button>
             <Button
               variant="ghost"
               size="sm"
@@ -455,7 +510,7 @@ export default function StaffFloorPage() {
                 }}
                 onOpenExtraTime={(s) => setExtraTimeSession(s)}
                 onOpenEndSession={(s) => setEndSessionItem(s)}
-                onOpenWalkIn={(t) => setWalkInTable(t)}
+                onOpenWalkIn={(t) => handleOpenWalkIn(t.type, t)}
               />
             );
           })}
@@ -585,13 +640,88 @@ export default function StaffFloorPage() {
 
         {/* WALK-IN OFFLINE BOOKING MODAL */}
         <Modal
-          isOpen={!!walkInTable}
-          onClose={() => setWalkInTable(null)}
-          title={`Walk-in: ${walkInTable?.name}`}
-          description="Reserve directly at the parlour desk. Slot locks instantly on the public website."
+          isOpen={isWalkInModalOpen}
+          onClose={() => {
+            setIsWalkInModalOpen(false);
+            setWalkInTable(null);
+          }}
+          title={walkInTable ? `Walk-in: ${walkInTable.name}` : "Walk-in Playing Session"}
+          description="Select discipline and duration. The system automatically allocates an available table and commences the session clock."
           isDark
         >
           <form onSubmit={handleCreateWalkIn} className="space-y-4 pt-2">
+            {walkInError && (
+              <div className="p-3 rounded-xl bg-cue/20 border border-cue/40 text-xs text-cue-light flex items-center gap-2">
+                <AlertTriangle className="w-4 h-4 flex-shrink-0" />
+                <span>{walkInError}</span>
+              </div>
+            )}
+
+            {/* Discipline Selection */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-mist uppercase tracking-wider">
+                Game Discipline
+              </label>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setWalkInDiscipline("pool");
+                    setWalkInTable(null);
+                  }}
+                  className={clsx(
+                    "p-3 rounded-xl border text-left transition-all",
+                    walkInDiscipline === "pool"
+                      ? "bg-baize/20 border-baize text-cream shadow-sm"
+                      : "bg-midnight border-midnight-line text-mist hover:text-cream"
+                  )}
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold text-xs sm:text-sm">🎱 American Pool</span>
+                    <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-baize/30 text-baize-light">
+                      {tables.filter((t) => t.type === "pool" && t.active && t.status === "free" && !sessions.some((s) => s.table_id === t.id && !s.ended_at)).length}/3 Free
+                    </span>
+                  </div>
+                  <div className="text-[11px] text-mist mt-1">₹300/hour · 9ft Match</div>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setWalkInDiscipline("snooker");
+                    setWalkInTable(null);
+                  }}
+                  className={clsx(
+                    "p-3 rounded-xl border text-left transition-all",
+                    walkInDiscipline === "snooker"
+                      ? "bg-bronze/20 border-bronze text-cream shadow-sm"
+                      : "bg-midnight border-midnight-line text-mist hover:text-cream"
+                  )}
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold text-xs sm:text-sm">🔴 English Snooker</span>
+                    <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-bronze/30 text-bronze-glow">
+                      {tables.filter((t) => t.type === "snooker" && t.active && t.status === "free" && !sessions.some((s) => s.table_id === t.id && !s.ended_at)).length}/3 Free
+                    </span>
+                  </div>
+                  <div className="text-[11px] text-mist mt-1">₹450/hour · 12ft Championship</div>
+                </button>
+              </div>
+            </div>
+
+            {walkInTable && (
+              <div className="p-2.5 rounded-lg bg-midnight border border-midnight-line text-xs text-mist flex items-center justify-between">
+                <span>Selected Table: <strong className="text-cream">{walkInTable.name}</strong></span>
+                <button
+                  type="button"
+                  onClick={() => setWalkInTable(null)}
+                  className="text-bronze-glow hover:underline text-[11px]"
+                >
+                  Switch to Auto-Allocate
+                </button>
+              </div>
+            )}
+
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-mist uppercase tracking-wider">
                 Guest Name
@@ -608,7 +738,7 @@ export default function StaffFloorPage() {
 
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-mist uppercase tracking-wider">
-                Phone Number
+                Phone Number (Optional)
               </label>
               <input
                 type="tel"
@@ -624,34 +754,41 @@ export default function StaffFloorPage() {
                 Initial Session Duration
               </label>
               <div className="grid grid-cols-3 gap-1.5 sm:gap-2">
-                {[60, 90, 120].map((m) => (
-                  <button
-                    key={m}
-                    type="button"
-                    onClick={() => setWalkInMinutes(m)}
-                    className={clsx(
-                      "py-2.5 px-1 sm:px-2 rounded-xl text-[11px] sm:text-xs font-bold border transition-all cursor-pointer touch-manipulation min-h-[44px] flex flex-col items-center justify-center",
-                      walkInMinutes === m
-                        ? "bg-bronze-glow text-midnight border-bronze-glow shadow-sm"
-                        : "bg-midnight border-midnight-line text-mist hover:text-cream"
-                    )}
-                  >
-                    <span>{m} min</span>
-                    <span className="text-[10px] opacity-80 font-normal">₹{Math.round((m / 60) * (walkInTable?.type === "snooker" ? 450 : 300))}</span>
-                  </button>
-                ))}
+                {[60, 90, 120].map((m) => {
+                  const rate = walkInTable ? (walkInTable.type === "snooker" ? 450 : 300) : (walkInDiscipline === "snooker" ? 450 : 300);
+                  const price = Math.round((m / 60) * rate);
+                  return (
+                    <button
+                      key={m}
+                      type="button"
+                      onClick={() => setWalkInMinutes(m)}
+                      className={clsx(
+                        "py-2.5 px-1 sm:px-2 rounded-xl text-[11px] sm:text-xs font-bold border transition-all cursor-pointer touch-manipulation min-h-[44px] flex flex-col items-center justify-center",
+                        walkInMinutes === m
+                          ? "bg-bronze-glow text-midnight border-bronze-glow shadow-sm"
+                          : "bg-midnight border-midnight-line text-mist hover:text-cream"
+                      )}
+                    >
+                      <span>{m} min</span>
+                      <span className="text-[10px] opacity-80 font-normal">₹{price}</span>
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
             <div className="pt-3 flex items-center gap-3">
               <Button variant="primary-dark" size="md" type="submit" className="w-full">
-                Confirm & Start Immediately
+                {walkInTable ? `Confirm ${walkInTable.name} & Start Timer` : `Auto-Allocate & Start Timer`}
               </Button>
               <Button
                 variant="ghost"
                 size="md"
                 type="button"
-                onClick={() => setWalkInTable(null)}
+                onClick={() => {
+                  setIsWalkInModalOpen(false);
+                  setWalkInTable(null);
+                }}
                 className="text-mist"
               >
                 Cancel

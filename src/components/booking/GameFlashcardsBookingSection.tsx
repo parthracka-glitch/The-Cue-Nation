@@ -156,6 +156,22 @@ export function GameFlashcardsBookingSection() {
       setConfirmedBooking(result);
       setStep(3);
 
+      // Synchronize with backend API in background so SSE broadcasts to Staff & Admin
+      fetch("/api/bookings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          tableId,
+          startISO: selectedSlot.startISO,
+          endISO: selectedSlot.endISO,
+          guestName: guestName.trim(),
+          guestPhone: guestPhone.trim(),
+          source: "online",
+        }),
+      }).catch(() => {
+        // Fallback to local store already accomplished
+      });
+
       // Trigger Confetti
       try {
         confetti({
