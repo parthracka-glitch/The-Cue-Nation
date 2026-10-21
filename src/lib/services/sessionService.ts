@@ -5,7 +5,7 @@ import { broadcastEvent } from "./realtimeEmitter";
 import { logAuditEvent } from "./auditService";
 
 export interface StartSessionInput {
-  tableId: string;
+  tableId?: string;
   pin?: string;
   bookingCode?: string;
   isWalkIn?: boolean;
@@ -16,7 +16,49 @@ export function startSession(input: StartSessionInput): {
   success: boolean;
   session?: Session;
   error?: string;
+  table?: any;
 } {
+  // If tableId is not provided, auto-allocate from PIN or bookingCode
+  if (!input.tableId || input.tableId === "auto") {
+    if (!input.pin && !input.bookingCode) {
+      return { success: false, error: "Table ID or PIN is required" };
+    }
+    const pinHashed = input.pin ? hashPin(input.pin.trim()) : "";
+    const cleanCode = input.bookingCode?.trim().toUpperCase();
+
+    const booking = backendDataStore.bookings.find(
+      (b) =>
+        (input.pin && (b.pin_hash === pinHashed || b.pin_hash === input.pin!.trim())) ||
+        (cleanCode && b.booking_code.toUpperCase() === cleanCode)
+    );
+
+    if (!booking) {
+      return { success: false, error: "No confirmed reservation found for this PIN" };
+    }
+
+    const origTable = backendDataStore.tables?.find((t) => t.id === booking.table_id);
+    const gameType: "pool" | "snooker" =
+      origTable?.type || (booking.table_id.includes("snooker") ? "snooker" : "pool");
+
+    // Find first free table among 3 tables of that type
+    const candidateTables = backendDataStore.tables.filter(
+      (t) => t.type === gameType && t.active && t.status === "free"
+    );
+    const freeTable = candidateTables.find((t) => {
+      return !backendDataStore.sessions.some((s) => s.table_id === t.id && !s.ended_at);
+    });
+
+    if (!freeTable) {
+      return {
+        success: false,
+        error: `All 3 ${gameType === "snooker" ? "Snooker" : "Pool"} tables are currently occupied.`,
+      };
+    }
+
+    input.tableId = freeTable.id;
+    booking.table_id = freeTable.id;
+  }
+
   const table =
     backendDataStore.tables?.find((t) => t.id === input.tableId) ||
     (backendDataStore.pools?.find((p) => p.id === input.tableId) as any);

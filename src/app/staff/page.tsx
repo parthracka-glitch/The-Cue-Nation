@@ -22,6 +22,7 @@ import {
   AlertTriangle,
   CheckCircle2,
   ChefHat,
+  Zap,
 } from "lucide-react";
 import { StaffNav } from "@/components/staff/StaffNav";
 
@@ -202,6 +203,11 @@ export default function StaffFloorPage() {
   const [pinInput, setPinInput] = useState("");
   const [pinError, setPinError] = useState("");
 
+  // Quick PIN Check-in & Auto-Allocation
+  const [quickPinInput, setQuickPinInput] = useState("");
+  const [quickPinError, setQuickPinError] = useState("");
+  const [allocationSuccess, setAllocationSuccess] = useState("");
+
   const [extraTimeSession, setExtraTimeSession] = useState<Session | null>(null);
   const [endSessionItem, setEndSessionItem] = useState<Session | null>(null);
 
@@ -224,17 +230,41 @@ export default function StaffFloorPage() {
     return unsub;
   }, []);
 
+  // Quick PIN Auto-Allocate Submit
+  const handleQuickPinSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setQuickPinError("");
+    setAllocationSuccess("");
+
+    if (!quickPinInput.trim()) {
+      setQuickPinError("Please enter the customer's 6-digit PIN");
+      return;
+    }
+
+    const res = venueStore.checkInWithPinAutoAllocate(quickPinInput.trim());
+    if (!res.success) {
+      setQuickPinError(res.error || "PIN verification failed");
+      return;
+    }
+
+    setAllocationSuccess(
+      `✅ Verified! Automatically allocated ${res.table?.name} for ${res.booking?.guest_name || "Guest"}. Session timer started.`
+    );
+    setQuickPinInput("");
+  };
+
   // PIN Check-in Submit
   const handleStartSessionWithPin = (e: React.FormEvent) => {
     e.preventDefault();
     setPinError("");
 
-    if (!bookingCodeInput.trim() || !pinInput.trim()) {
-      setPinError("Please enter both the booking code and 6-digit PIN");
+    const pinToTry = pinInput.trim() || bookingCodeInput.trim();
+    if (!pinToTry) {
+      setPinError("Please enter the 6-digit PIN");
       return;
     }
 
-    const res = venueStore.startSessionWithPin(bookingCodeInput, pinInput);
+    const res = venueStore.checkInWithPinAutoAllocate(pinToTry);
     if (!res.success) {
       setPinError(res.error || "Verification failed");
       return;
@@ -337,6 +367,67 @@ export default function StaffFloorPage() {
               <RefreshCw className="w-4 h-4" />
             </Button>
           </div>
+        </div>
+
+        {/* FAST PIN CHECK-IN & AUTO ALLOCATION BAR */}
+        <div className="bg-midnight-card border-2 border-bronze-glow/40 rounded-2xl p-5 shadow-card space-y-3">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-bronze-glow">
+                <KeyRound className="w-4 h-4 text-bronze-glow" />
+                Customer Arrival · Fast PIN Check-In & Auto Table Allocation
+              </div>
+              <p className="text-xs text-mist mt-0.5">
+                Customer gives their 6-digit PIN. The system verifies the reservation and automatically allocates an available Pool or Snooker table.
+              </p>
+            </div>
+
+            <form onSubmit={handleQuickPinSubmit} className="flex items-center gap-2 w-full md:w-auto">
+              <input
+                type="text"
+                maxLength={6}
+                placeholder="Enter 6-digit PIN (e.g. 481920)"
+                value={quickPinInput}
+                onChange={(e) => setQuickPinInput(e.target.value)}
+                className="bg-midnight border border-midnight-line rounded-xl px-4 py-2 text-sm font-mono text-cream placeholder-mist/40 focus:border-bronze-glow focus:outline-none w-full md:w-64 tracking-[0.2em] text-center"
+              />
+              <Button
+                variant="primary-dark"
+                size="sm"
+                type="submit"
+                className="shrink-0 gap-1.5 font-bold cursor-pointer"
+              >
+                <Zap className="w-4 h-4 text-midnight" />
+                Verify & Allocate Table
+              </Button>
+            </form>
+          </div>
+
+          {allocationSuccess && (
+            <div className="p-3 bg-baize/20 border border-baize/40 rounded-xl text-xs text-baize-light flex items-center justify-between animate-in fade-in">
+              <span>{allocationSuccess}</span>
+              <button
+                type="button"
+                onClick={() => setAllocationSuccess("")}
+                className="text-mist hover:text-cream text-xs ml-3"
+              >
+                Dismiss
+              </button>
+            </div>
+          )}
+
+          {quickPinError && (
+            <div className="p-3 bg-cue/20 border border-cue/40 rounded-xl text-xs text-cue-light flex items-center justify-between animate-in fade-in">
+              <span>{quickPinError}</span>
+              <button
+                type="button"
+                onClick={() => setQuickPinError("")}
+                className="text-mist hover:text-cream text-xs ml-3"
+              >
+                Dismiss
+              </button>
+            </div>
+          )}
         </div>
 
         {/* 6 Tables Grid */}

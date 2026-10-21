@@ -4,76 +4,76 @@ import { GameTable, Booking, Session, Order, Bill, MenuItem, Expense, TableStatu
 
 const INITIAL_TABLES: GameTable[] = [
   {
-    id: "main-pool",
-    name: "Main Pool — Tournament Arena",
+    id: "pool-1",
+    name: "Pool Table 1",
     type: "pool",
     status: "free",
-    qr_secret: "secret-main-pool",
+    qr_secret: "secret-pool-1",
     active: true,
     category: "main",
     opening_time: "10:00",
-    closing_time: "01:00",
-    hourly_rate: 350,
-  },
-  {
-    id: "smoker-pool",
-    name: "Smoker Pool — Smoking Lounge",
-    type: "pool",
-    status: "free",
-    qr_secret: "secret-smoker-pool",
-    active: true,
-    category: "smoker",
-    opening_time: "11:00",
     closing_time: "02:00",
-    hourly_rate: 400,
+    hourly_rate: 300,
   },
   {
-    id: "table-1",
-    name: "Table 1 — Brunswick Gold Crown",
+    id: "pool-2",
+    name: "Pool Table 2",
     type: "pool",
     status: "free",
-    qr_secret: "secret-table-1",
+    qr_secret: "secret-pool-2",
     active: true,
+    category: "main",
+    opening_time: "10:00",
+    closing_time: "02:00",
+    hourly_rate: 300,
   },
   {
-    id: "table-2",
-    name: "Table 2 — Rasson Ox Pool",
+    id: "pool-3",
+    name: "Pool Table 3",
     type: "pool",
     status: "free",
-    qr_secret: "secret-table-2",
+    qr_secret: "secret-pool-3",
     active: true,
+    category: "main",
+    opening_time: "10:00",
+    closing_time: "02:00",
+    hourly_rate: 300,
   },
   {
-    id: "table-3",
-    name: "Table 3 — Diamond Pro-Am",
-    type: "pool",
-    status: "running",
-    qr_secret: "secret-table-3",
-    active: true,
-  },
-  {
-    id: "table-4",
-    name: "Table 4 — Dynamic III Pool",
-    type: "pool",
-    status: "free",
-    qr_secret: "secret-table-4",
-    active: true,
-  },
-  {
-    id: "table-5",
-    name: "Table 5 — Riley Aristocrat Snooker",
+    id: "snooker-1",
+    name: "Snooker Table 1",
     type: "snooker",
     status: "free",
-    qr_secret: "secret-table-5",
+    qr_secret: "secret-snooker-1",
     active: true,
+    category: "main",
+    opening_time: "10:00",
+    closing_time: "02:00",
+    hourly_rate: 450,
   },
   {
-    id: "table-6",
-    name: "Table 6 — Star Tournament Snooker",
+    id: "snooker-2",
+    name: "Snooker Table 2",
     type: "snooker",
     status: "free",
-    qr_secret: "secret-table-6",
+    qr_secret: "secret-snooker-2",
     active: true,
+    category: "main",
+    opening_time: "10:00",
+    closing_time: "02:00",
+    hourly_rate: 450,
+  },
+  {
+    id: "snooker-3",
+    name: "Snooker Table 3",
+    type: "snooker",
+    status: "free",
+    qr_secret: "secret-snooker-3",
+    active: true,
+    category: "main",
+    opening_time: "10:00",
+    closing_time: "02:00",
+    hourly_rate: 450,
   },
 ];
 
@@ -289,7 +289,19 @@ class VenueStore {
 
   private loadFromStorage() {
     try {
+      const CURRENT_STORE_VERSION = "v4_3pool_3snooker";
+      const ver = localStorage.getItem("cn_store_ver");
       const t = localStorage.getItem("cn_tables");
+
+      // Auto-migrate if version is old or tables missing standard pool-1/snooker-1 IDs
+      if (ver !== CURRENT_STORE_VERSION || !t || !t.includes("pool-1") || !t.includes("snooker-1")) {
+        this.tables = [...INITIAL_TABLES];
+        localStorage.setItem("cn_tables", JSON.stringify(this.tables));
+        localStorage.setItem("cn_store_ver", CURRENT_STORE_VERSION);
+      } else {
+        this.tables = JSON.parse(t);
+      }
+
       const b = localStorage.getItem("cn_bookings");
       const s = localStorage.getItem("cn_sessions");
       const o = localStorage.getItem("cn_orders");
@@ -297,7 +309,6 @@ class VenueStore {
       const e = localStorage.getItem("cn_expenses");
       const m = localStorage.getItem("cn_menu");
 
-      if (t) this.tables = JSON.parse(t);
       if (b) this.bookings = JSON.parse(b);
       if (s) this.sessions = JSON.parse(s);
       if (o) this.orders = JSON.parse(o);
@@ -306,6 +317,7 @@ class VenueStore {
       if (m) this.menu = JSON.parse(m);
     } catch {
       // fallback to initial
+      this.tables = [...INITIAL_TABLES];
     }
   }
 
@@ -388,7 +400,7 @@ class VenueStore {
     const code = "CN-" + Math.random().toString(36).substring(2, 8).toUpperCase();
 
     const newBooking: Booking = {
-      id: `b-${Date.now()}`,
+      id: `b-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
       booking_code: code,
       user_id: params.userId || null,
       guest_name: params.guestName || "Guest",
@@ -418,42 +430,130 @@ class VenueStore {
     return { booking: newBooking, pin };
   }
 
-  startSessionWithPin(code: string, pin: string): { success: boolean; error?: string; sessionId?: string } {
-    const cleanCode = code.trim().toUpperCase();
+  getAvailableTablesCount(type: "pool" | "snooker", startISO: string, endISO: string): number {
+    const matchingTables = this.tables.filter((t) => t.type === type && t.active);
+    const total = matchingTables.length; // exactly 3
+    const slotStartMs = new Date(startISO).getTime();
+    const slotEndMs = new Date(endISO).getTime();
+
+    const bookedTableIds = new Set<string>();
+    this.bookings.forEach((b) => {
+      if (b.status === "cancelled" || b.status === "no_show" || b.status === "completed") return;
+      const table = this.tables.find((t) => t.id === b.table_id);
+      if (!table || table.type !== type) return;
+
+      const clean = b.during.replace(/[\[\]\(\)"]/g, "");
+      const [startStr, endStr] = clean.split(",");
+      if (!startStr || !endStr) return;
+      const bStartMs = new Date(startStr).getTime();
+      const bEndMs = new Date(endStr).getTime();
+      if (slotStartMs < bEndMs && slotEndMs > bStartMs) {
+        bookedTableIds.add(b.table_id);
+      }
+    });
+
+    return Math.max(0, total - bookedTableIds.size);
+  }
+
+  findAvailableTableForSlot(type: "pool" | "snooker", startISO: string, endISO: string): GameTable | null {
+    const matchingTables = this.tables.filter((t) => t.type === type && t.active);
+    const slotStartMs = new Date(startISO).getTime();
+    const slotEndMs = new Date(endISO).getTime();
+
+    for (const table of matchingTables) {
+      const isBooked = this.bookings.some((b) => {
+        if (b.table_id !== table.id) return false;
+        if (b.status === "cancelled" || b.status === "no_show" || b.status === "completed") return false;
+        const clean = b.during.replace(/[\[\]\(\)"]/g, "");
+        const [startStr, endStr] = clean.split(",");
+        if (!startStr || !endStr) return false;
+        const bStartMs = new Date(startStr).getTime();
+        const bEndMs = new Date(endStr).getTime();
+        return slotStartMs < bEndMs && slotEndMs > bStartMs;
+      });
+      if (!isBooked) return table;
+    }
+    return null;
+  }
+
+  checkInWithPinAutoAllocate(pinInput: string): {
+    success: boolean;
+    error?: string;
+    table?: GameTable;
+    booking?: Booking;
+    session?: Session;
+  } {
+    const clean = pinInput.trim().toUpperCase();
+    if (!clean) {
+      return { success: false, error: "Please enter your 6-digit PIN" };
+    }
+
+    // Match by PIN or by booking code
     const booking = this.bookings.find(
-      (b) => b.booking_code.toUpperCase() === cleanCode && b.status === "confirmed"
+      (b) =>
+        (b.pin_hash === clean || b.booking_code.toUpperCase() === clean) &&
+        (b.status === "confirmed" || b.status === "pending" || b.status === "checked_in")
     );
 
     if (!booking) {
-      return { success: false, error: "Booking code not found or already checked in" };
+      return { success: false, error: "Invalid PIN or reservation not found." };
     }
 
-    if (booking.pin_attempts >= 5) {
-      return { success: false, error: "Too many failed attempts. PIN locked. Contact owner." };
+    if (booking.status === "completed") {
+      return { success: false, error: "This reservation has already concluded and billed" };
     }
 
-    if (booking.pin_hash !== pin.trim()) {
-      booking.pin_attempts += 1;
-      this.saveToStorage();
+    // Check if session already active for this booking
+    const activeSession = this.sessions.find((s) => s.booking_id === booking.id && !s.ended_at);
+    if (activeSession) {
+      const tbl = this.tables.find((t) => t.id === activeSession.table_id);
       return {
-        success: false,
-        error: `Incorrect PIN. ${5 - booking.pin_attempts} attempts remaining.`,
+        success: true,
+        table: tbl,
+        booking,
+        session: activeSession,
       };
     }
 
-    // Check if table already has a running session
-    const existing = this.getRunningSessionForTable(booking.table_id);
-    if (existing) {
-      return { success: false, error: "Table already has an active running session" };
+    // Detect game type (pool or snooker)
+    const assignedTable = this.tables.find((t) => t.id === booking.table_id);
+    const gameType: "pool" | "snooker" =
+      assignedTable?.type || (booking.table_id?.includes("snooker") ? "snooker" : "pool");
+
+    // Get the 3 tables for this game
+    const candidateTables = this.tables.filter((t) => t.type === gameType && t.active);
+
+    // Prefer pre-assigned table if it has no active running session
+    let allocatedTable: GameTable | undefined;
+    if (
+      assignedTable &&
+      !this.sessions.some((s) => s.table_id === assignedTable.id && !s.ended_at)
+    ) {
+      allocatedTable = assignedTable;
+    } else {
+      // Otherwise find the first candidate table of this discipline with no running session
+      allocatedTable = candidateTables.find((t) => {
+        const hasRunning = this.sessions.some((s) => s.table_id === t.id && !s.ended_at);
+        return !hasRunning;
+      });
     }
 
-    // Start session
+    if (!allocatedTable) {
+      return {
+        success: false,
+        error: `All 3 ${gameType === "snooker" ? "Snooker" : "Pool"} tables are currently occupied. Please wait for an active game to finish.`,
+      };
+    }
+
+    // Auto-allocate this table
+    booking.table_id = allocatedTable.id;
     booking.status = "checked_in";
-    const sessionId = `sess-${Date.now()}`;
+
+    const sessionId = `sess-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
     const newSession: Session = {
       id: sessionId,
       booking_id: booking.id,
-      table_id: booking.table_id,
+      table_id: allocatedTable.id,
       started_at: new Date().toISOString(),
       ended_at: null,
       extra_minutes: 0,
@@ -461,14 +561,36 @@ class VenueStore {
     };
 
     this.sessions.push(newSession);
-
-    const table = this.tables.find((t) => t.id === booking.table_id);
-    if (table) {
-      table.status = "running";
-    }
+    allocatedTable.status = "running";
 
     this.saveToStorage();
-    return { success: true, sessionId };
+    this.notify();
+
+    return {
+      success: true,
+      table: allocatedTable,
+      booking,
+      session: newSession,
+    };
+  }
+
+  startSessionWithPin(codeOrPin: string, optionalPin?: string): { success: boolean; error?: string; sessionId?: string } {
+    // If only one argument is provided, or both are provided, auto-allocate
+    const pinToTry = optionalPin ? optionalPin.trim() : codeOrPin.trim();
+    const autoRes = this.checkInWithPinAutoAllocate(pinToTry);
+    if (autoRes.success && autoRes.session) {
+      return { success: true, sessionId: autoRes.session.id };
+    }
+    
+    // Also try looking up by code if pinToTry wasn't found
+    if (optionalPin && codeOrPin) {
+      const byCodeRes = this.checkInWithPinAutoAllocate(codeOrPin.trim());
+      if (byCodeRes.success && byCodeRes.session) {
+        return { success: true, sessionId: byCodeRes.session.id };
+      }
+    }
+
+    return { success: false, error: autoRes.error || "PIN verification failed" };
   }
 
   addExtraTime(sessionId: string, minutes: number): { success: boolean; error?: string } {
@@ -620,6 +742,15 @@ class VenueStore {
 
   refresh() {
     this.loadFromStorage();
+  }
+
+  resetForTesting() {
+    this.tables = JSON.parse(JSON.stringify(INITIAL_TABLES));
+    this.bookings = [];
+    this.sessions = [];
+    this.orders = [];
+    this.bills = [];
+    this.expenses = [];
   }
 
   addExtraMinutes(sessionId: string, minutes: number): boolean {

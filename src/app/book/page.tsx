@@ -4,7 +4,6 @@ import React, { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
-import { StatusBadge } from "@/components/ui/Badge";
 import { venueStore } from "@/lib/store/venueStore";
 import { useAuth } from "@/lib/store/authContext";
 import { GameTable, Booking } from "@/types/database";
@@ -23,6 +22,10 @@ import {
   KeyRound,
   Check,
   RefreshCw,
+  Sparkles,
+  Award,
+  Layers,
+  CheckCheck,
 } from "lucide-react";
 import clsx from "clsx";
 import { BackButton } from "@/components/ui/BackButton";
@@ -32,10 +35,11 @@ function BookingContent() {
   const { user } = useAuth();
 
   const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
-  const [tables, setTables] = useState<GameTable[]>([]);
-  const [selectedTable, setSelectedTable] = useState<GameTable | null>(null);
+  const [selectedGameType, setSelectedGameType] = useState<"pool" | "snooker">("pool");
+  const [durationHours, setDurationHours] = useState<number>(1);
 
   // Selected date (default today)
+  const [selectedDateOffset, setSelectedDateOffset] = useState<number>(0);
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [availableSlots, setAvailableSlots] = useState<TimeSlot[]>([]);
   const [selectedSlot, setSelectedSlot] = useState<TimeSlot | null>(null);
@@ -43,23 +47,24 @@ function BookingContent() {
   // Guest details form
   const [guestName, setGuestName] = useState(user?.name || "");
   const [guestPhone, setGuestPhone] = useState(user?.phone || "");
+  const [guestEmail, setGuestEmail] = useState(user?.email || "");
+  const [paymentMethod, setPaymentMethod] = useState<"pay_at_venue" | "online">("pay_at_venue");
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [confirmedBooking, setConfirmedBooking] = useState<{ booking: Booking; pin: string } | null>(null);
   const [hasCopiedPin, setHasCopiedPin] = useState(false);
   const [hasCopiedCode, setHasCopiedCode] = useState(false);
 
-  // Load tables
-  useEffect(() => {
-    const list = venueStore.getTables();
-    setTables(list);
+  // Tables sync
+  const [tables, setTables] = useState<GameTable[]>([]);
 
-    const initialTableId = searchParams.get("poolId") || searchParams.get("tableId");
-    if (initialTableId) {
-      const match = list.find((t) => t.id === initialTableId);
-      if (match) {
-        setSelectedTable(match);
-        setStep(2);
-      }
+  useEffect(() => {
+    setTables(venueStore.getTables());
+
+    const initialType = searchParams.get("type");
+    if (initialType === "snooker" || initialType === "pool") {
+      setSelectedGameType(initialType);
+      setStep(2);
     }
 
     const unsub = venueStore.subscribe(() => {
@@ -68,115 +73,97 @@ function BookingContent() {
     return unsub;
   }, [searchParams]);
 
-  // Update slots when date or table changes
+  // Update date based on offset
+  useEffect(() => {
+    const d = new Date();
+    d.setDate(d.getDate() + selectedDateOffset);
+    setSelectedDate(d);
+    setSelectedSlot(null);
+  }, [selectedDateOffset]);
+
+  // Update slots when date changes
   useEffect(() => {
     const slots = generateDaySlots(selectedDate);
     setAvailableSlots(slots);
-  }, [selectedDate, selectedTable]);
+  }, [selectedDate]);
 
-  // Check if slot is booked
-  const isSlotBooked = (slot: TimeSlot) => {
-    if (!selectedTable) return false;
-    const allBookings = venueStore.getBookings();
-    const slotStartMs = new Date(slot.startISO).getTime();
-    const slotEndMs = new Date(slot.endISO).getTime();
-
-    return allBookings.some((b) => {
-      if (b.table_id !== selectedTable.id) return false;
-      if (b.status === "cancelled" || b.status === "no_show") return false;
-
-      // Extract interval [start, end)
-      const clean = b.during.replace(/[\[\]\(\)"]/g, "");
-      const [startStr, endStr] = clean.split(",");
-      if (!startStr || !endStr) return false;
-
-      const bStartMs = new Date(startStr).getTime();
-      const bEndMs = new Date(endStr).getTime();
-      return slotStartMs < bEndMs && slotEndMs > bStartMs;
-    });
+  // Live slot capacity across the 3 tables
+  const getSlotCapacity = (slot: TimeSlot) => {
+    const freeCount = venueStore.getAvailableTablesCount(
+      selectedGameType,
+      slot.startISO,
+      slot.endISO
+    );
+    return {
+      freeCount,
+      isAvailable: freeCount > 0,
+    };
   };
 
-  const handleTableSelect = (t: GameTable) => {
-    setSelectedTable(t);
+  const hourlyRate = selectedGameType === "snooker" ? 450 : 300;
+  const totalAmount = hourlyRate * durationHours;
+
+  const handleSelectGame = (type: "pool" | "snooker") => {
+    setSelectedGameType(type);
+    setSelectedSlot(null);
     setStep(2);
   };
 
   const handleSlotSelect = (s: TimeSlot) => {
-    if (isSlotBooked(s)) return;
+    const { isAvailable } = getSlotCapacity(s);
+    if (!isAvailable) return;
     setSelectedSlot(s);
     setStep(3);
   };
 
   const handleConfirmBooking = async () => {
-    if (!selectedTable || !selectedSlot) return;
+    if (!selectedSlot) return;
+    if (!guestName.trim()) {
+      alert("Please provide your name.");
+      return;
+    }
+    if (!guestPhone.trim() || guestPhone.replace(/\D/g, "").length < 10) {
+      alert("Please enter a valid 10-digit mobile number.");
+      return;
+    }
 
     setIsSubmitting(true);
-    const hourlyRate = (selectedTable as any).hourly_rate || (selectedTable.type === "snooker" ? 450 : 350);
 
     try {
-      // 1. Post to backend API for atomic anti-double-booking validation & DB persistence
-      const apiRes = await fetch("/api/bookings", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          tableId: selectedTable.id,
-          startISO: selectedSlot.startISO,
-          endISO: selectedSlot.endISO,
-          guestName: guestName.trim() || "Guest Cueist",
-          guestPhone: guestPhone.trim() || "+91 98765 43210",
-          guestEmail: user?.email || undefined,
-          source: "online",
-          userId: user?.id,
-          paymentMethod: "pay_at_desk",
-        }),
+      // Find candidate table among 3 tables
+      const candidateTable = venueStore.findAvailableTableForSlot(
+        selectedGameType,
+        selectedSlot.startISO,
+        selectedSlot.endISO
+      );
+      const tableId = candidateTable?.id || `${selectedGameType}-1`;
+
+      const result = venueStore.createBooking({
+        tableId,
+        startISO: selectedSlot.startISO,
+        endISO: selectedSlot.endISO,
+        guestName: guestName.trim() || "Guest Cueist",
+        guestPhone: guestPhone.trim(),
+        amount: totalAmount,
+        source: "online",
+        userId: user?.id || null,
       });
 
-      if (apiRes.ok) {
-        const data = await apiRes.json();
-        setConfirmedBooking({
-          booking: data.booking,
-          pin: data.rawPin || data.pin || "000000",
-        });
-        venueStore.refresh();
-      } else {
-        // Fallback to local venueStore
-        const result = venueStore.createBooking({
-          tableId: selectedTable.id,
-          startISO: selectedSlot.startISO,
-          endISO: selectedSlot.endISO,
-          guestName: guestName.trim() || "Guest Cueist",
-          guestPhone: guestPhone.trim() || "+919876543210",
-          amount: hourlyRate,
-          source: "online",
-          userId: user?.id,
-        });
-        setConfirmedBooking(result);
-      }
-
+      setConfirmedBooking(result);
       setStep(4);
+
       try {
         confetti({
           particleCount: 80,
           spread: 70,
           origin: { y: 0.6 },
-          colors: ["#B8925A", "#0A5551", "#EDDFC2"],
+          colors: ["#C5A059", "#1B4D3E", "#E6C687", "#FFFFFF"],
         });
       } catch {
         // ignore
       }
-    } catch {
-      const result = venueStore.createBooking({
-        tableId: selectedTable.id,
-        startISO: selectedSlot.startISO,
-        endISO: selectedSlot.endISO,
-        guestName: guestName.trim() || "Guest Cueist",
-        guestPhone: guestPhone.trim() || "+919876543210",
-        amount: hourlyRate,
-        source: "online",
-        userId: user?.id,
-      });
-      setConfirmedBooking(result);
-      setStep(4);
+    } catch (err: any) {
+      alert(err.message || "Failed to reserve slot. Please pick another slot.");
     } finally {
       setIsSubmitting(false);
     }
@@ -186,10 +173,10 @@ function BookingContent() {
     navigator.clipboard.writeText(text);
     if (type === "pin") {
       setHasCopiedPin(true);
-      setTimeout(() => setHasCopiedPin(false), 2000);
+      setTimeout(() => setHasCopiedPin(false), 2500);
     } else {
       setHasCopiedCode(true);
-      setTimeout(() => setHasCopiedCode(false), 2000);
+      setTimeout(() => setHasCopiedCode(false), 2500);
     }
   };
 
@@ -213,22 +200,22 @@ function BookingContent() {
         {/* Header and Step Progress */}
         <div className="text-center space-y-3">
           <span className="text-xs uppercase tracking-[0.2em] font-bold text-baize">
-            Live Booking Engine
+            Live Booking Engine · 3 Pool & 3 Snooker Tables
           </span>
           <h1 className="font-display text-3xl sm:text-4xl font-bold text-midnight">
             Reserve Your Rack
           </h1>
           <p className="text-sm text-ash max-w-md mx-auto">
-            Realtime slot reservation protected against overlapping bookings. Show your 6-digit PIN on arrival.
+            Synchronized slot reservation across 6 tables with zero double-booking. Receive your 6-digit PIN instantly for automatic table allocation.
           </p>
 
           {/* Stepper (Steps 1, 2, 3) */}
           {step <= 3 && (
             <div className="flex items-center justify-center gap-2 sm:gap-4 pt-4 max-w-md mx-auto">
               {[
-                { s: 1, label: "Table" },
+                { s: 1, label: "Discipline" },
                 { s: 2, label: "Date & Slot" },
-                { s: 3, label: "Confirm" },
+                { s: 3, label: "Confirm Details" },
               ].map((item, idx) => (
                 <React.Fragment key={item.s}>
                   <div
@@ -272,156 +259,245 @@ function BookingContent() {
           )}
         </div>
 
-        {/* STEP 1: SELECT TABLE */}
+        {/* STEP 1: TWO MASTER FLASHCARDS */}
         {step === 1 && (
           <div className="space-y-6 animate-in fade-in duration-300">
-            <h2 className="font-display text-xl font-bold text-midnight">
-              Step 1: Choose Your Table
+            <h2 className="font-display text-xl font-bold text-midnight text-center">
+              Step 1: Choose Your Discipline (Pool or Snooker)
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {tables.map((t) => {
-                const isSnooker = t.type === "snooker";
-                const hourlyRate = isSnooker ? 450 : 300;
-                return (
-                  <Card
-                    key={t.id}
-                    variant="light"
-                    className="p-5 flex flex-col justify-between hover:border-bronze hover:shadow-lg transition-all cursor-pointer group"
-                    onClick={() => handleTableSelect(t)}
-                  >
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <span className="text-[10px] uppercase font-bold tracking-wider text-baize">
-                          {isSnooker ? "Full Size Snooker" : "Tournament 9ft Pool"}
-                        </span>
-                        <h3 className="font-display text-lg font-bold text-midnight group-hover:text-bronze mt-0.5">
-                          {t.name}
-                        </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              {/* Pool Card */}
+              <div
+                onClick={() => handleSelectGame("pool")}
+                className="bg-midnight rounded-3xl overflow-hidden border border-midnight-line shadow-card hover:shadow-2xl hover:border-baize-light/50 transition-all cursor-pointer flex flex-col justify-between group"
+              >
+                <div className="relative h-56 w-full overflow-hidden">
+                  <img
+                    src="https://images.unsplash.com/photo-1534423861386-85a16f5d13fd?auto=format&fit=crop&w=1200&q=80"
+                    alt="American Pool"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-85"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-midnight via-midnight/40 to-transparent" />
+                  <div className="absolute top-4 left-4 bg-baize text-cream text-xs font-bold px-3 py-1 rounded-full border border-baize-light/40">
+                    3 Tables Available
+                  </div>
+                  <div className="absolute top-4 right-4 bg-midnight/80 backdrop-blur-md px-3 py-1 rounded-full text-xs font-bold text-cream">
+                    9ft Tournament
+                  </div>
+                  <div className="absolute bottom-4 left-6 right-6 flex items-baseline justify-between text-cream">
+                    <div>
+                      <span className="text-[10px] text-mist uppercase font-semibold">Rate</span>
+                      <div className="text-2xl font-display font-black text-bronze-glow">
+                        ₹300<span className="text-xs font-normal text-mist">/hour</span>
                       </div>
-                      <StatusBadge status={t.status} />
                     </div>
+                    <span className="text-xs text-baize-light font-bold">Auto Table Allocation</span>
+                  </div>
+                </div>
 
-                    <div className="my-4 text-xs text-ash">
-                      {isSnooker
-                        ? "Strachan 6811 baize, precision Aramith balls & tournament lighting."
-                        : "Laser leveled slate, fast felt, and matched cue sets."}
-                    </div>
+                <div className="p-6 space-y-4">
+                  <div>
+                    <h3 className="font-display text-2xl font-bold text-cream group-hover:text-baize-light transition-colors">
+                      American Pool
+                    </h3>
+                    <p className="text-xs text-mist mt-1 leading-relaxed">
+                      3 Brazilian slate 9ft tables with fast felt, responsive K55 cushions, and precision drop pockets.
+                    </p>
+                  </div>
+                  <Button variant="primary" size="md" className="w-full justify-center gap-2">
+                    Select Pool Slots
+                    <ArrowRight className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
 
-                    <div className="pt-3 border-t border-black/5 flex items-center justify-between">
-                      <div className="font-display text-lg font-bold text-bronze tabular-nums">
-                        ₹{hourlyRate}
-                        <span className="text-xs font-normal text-ash">/hour</span>
+              {/* Snooker Card */}
+              <div
+                onClick={() => handleSelectGame("snooker")}
+                className="bg-midnight rounded-3xl overflow-hidden border border-midnight-line shadow-card hover:shadow-2xl hover:border-bronze-glow/50 transition-all cursor-pointer flex flex-col justify-between group"
+              >
+                <div className="relative h-56 w-full overflow-hidden">
+                  <img
+                    src="https://images.unsplash.com/photo-1596727147705-61a532a659bd?auto=format&fit=crop&w=1200&q=80"
+                    alt="English Snooker"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-85"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-midnight via-midnight/40 to-transparent" />
+                  <div className="absolute top-4 left-4 bg-bronze text-cream text-xs font-bold px-3 py-1 rounded-full border border-bronze-glow/40">
+                    3 Tables Available
+                  </div>
+                  <div className="absolute top-4 right-4 bg-midnight/80 backdrop-blur-md px-3 py-1 rounded-full text-xs font-bold text-cream">
+                    12ft Full-Size
+                  </div>
+                  <div className="absolute bottom-4 left-6 right-6 flex items-baseline justify-between text-cream">
+                    <div>
+                      <span className="text-[10px] text-mist uppercase font-semibold">Rate</span>
+                      <div className="text-2xl font-display font-black text-bronze-glow">
+                        ₹450<span className="text-xs font-normal text-mist">/hour</span>
                       </div>
-                      <Button variant="primary" size="sm" className="gap-1.5">
-                        Select Slot
-                        <ArrowRight className="w-3.5 h-3.5" />
-                      </Button>
                     </div>
-                  </Card>
-                );
-              })}
+                    <span className="text-xs text-bronze-glow font-bold">Auto Table Allocation</span>
+                  </div>
+                </div>
+
+                <div className="p-6 space-y-4">
+                  <div>
+                    <h3 className="font-display text-2xl font-bold text-cream group-hover:text-bronze-glow transition-colors">
+                      English Snooker
+                    </h3>
+                    <p className="text-xs text-mist mt-1 leading-relaxed">
+                      3 full-size 12ft championship tables with Strachan 6811 100% wool cloth & Northern rubber cushions.
+                    </p>
+                  </div>
+                  <Button variant="primary" size="md" className="w-full justify-center gap-2">
+                    Select Snooker Slots
+                    <ArrowRight className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
             </div>
           </div>
         )}
 
         {/* STEP 2: SELECT DATE & TIME SLOT */}
-        {step === 2 && selectedTable && (
+        {step === 2 && (
           <div className="space-y-6 animate-in fade-in duration-300">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-xl bg-cream-card border border-black/10">
+            {/* Selected Game Banner */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-2xl bg-midnight text-cream border border-midnight-line shadow-sm">
               <div>
-                <span className="text-xs text-ash">Selected Table:</span>
-                <div className="font-display font-bold text-lg text-midnight">
-                  {selectedTable.name}
+                <span className="text-[10px] uppercase font-bold text-mist tracking-wider">
+                  Selected Discipline
+                </span>
+                <div className="font-display font-bold text-xl text-cream">
+                  {selectedGameType === "snooker" ? "🔴 English Snooker (3 Tables)" : "🎱 American Pool (3 Tables)"}
                 </div>
               </div>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setStep(1)}
-                className="self-start sm:self-auto text-xs gap-1"
-              >
-                <ArrowLeft className="w-3 h-3" /> Change Table
-              </Button>
+              <div className="flex items-center gap-3">
+                <span className="text-sm font-display font-bold text-bronze-glow">
+                  ₹{hourlyRate}/hr
+                </span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setStep(1)}
+                  className="text-xs gap-1 border-white/20 text-cream hover:bg-white/10"
+                >
+                  <ArrowLeft className="w-3 h-3" /> Change Game
+                </Button>
+              </div>
             </div>
 
-            <div className="space-y-4">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <h2 className="font-display text-lg sm:text-xl font-bold text-midnight">
-                  Step 2: Choose Slot for {formatDateIST(selectedDate)}
-                </h2>
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => {
-                      const d = new Date(selectedDate);
-                      d.setDate(d.getDate() - 1);
-                      if (d >= new Date(new Date().setHours(0, 0, 0, 0))) {
-                        setSelectedDate(d);
-                      }
-                    }}
-                    className="flex-1 sm:flex-none px-3 py-2 rounded-xl border border-black/10 hover:bg-black/5 text-xs font-bold touch-manipulation min-h-[38px] flex items-center justify-center cursor-pointer"
-                  >
-                    ← Previous Day
-                  </button>
-                  <button
-                    onClick={() => {
-                      const d = new Date(selectedDate);
-                      d.setDate(d.getDate() + 1);
-                      setSelectedDate(d);
-                    }}
-                    className="flex-1 sm:flex-none px-3 py-2 rounded-xl border border-black/10 hover:bg-black/5 text-xs font-bold touch-manipulation min-h-[38px] flex items-center justify-center cursor-pointer"
-                  >
-                    Next Day →
-                  </button>
-                </div>
-              </div>
-
-              {/* Slots Grid */}
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5 sm:gap-3">
-                {availableSlots.map((slot) => {
-                  const booked = isSlotBooked(slot);
-                  const isSelected = selectedSlot?.id === slot.id;
+            {/* Date Selection */}
+            <div className="space-y-2">
+              <label className="text-xs font-bold uppercase tracking-wider text-ash flex items-center gap-1.5">
+                <CalendarIcon className="w-3.5 h-3.5 text-bronze" />
+                Select Booking Date
+              </label>
+              <div className="grid grid-cols-4 gap-2">
+                {[0, 1, 2, 3].map((offset) => {
+                  const d = new Date();
+                  d.setDate(d.getDate() + offset);
+                  const dayLabel = offset === 0 ? "Today" : offset === 1 ? "Tomorrow" : d.toLocaleDateString("en-US", { weekday: "short" });
+                  const dateStr = d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+                  const isSelected = selectedDateOffset === offset;
 
                   return (
                     <button
-                      key={slot.id}
-                      disabled={booked}
-                      onClick={() => handleSlotSelect(slot)}
-                      className={clsx(
-                        "p-3.5 rounded-xl border text-left transition-all cursor-pointer relative",
-                        booked
-                          ? "bg-black/5 border-black/10 text-ash/50 line-through cursor-not-allowed opacity-60"
-                          : isSelected
-                          ? "bg-bronze text-cream border-bronze shadow-md ring-2 ring-bronze ring-offset-2"
-                          : "bg-cream-card border-black/10 text-midnight hover:border-bronze hover:bg-cream"
-                      )}
+                      key={offset}
+                      type="button"
+                      onClick={() => setSelectedDateOffset(offset)}
+                      className={`p-3 rounded-2xl border text-center transition-all cursor-pointer ${
+                        isSelected
+                          ? "bg-bronze text-cream border-bronze shadow-md font-bold"
+                          : "bg-white border-black/10 text-ash hover:text-midnight hover:border-bronze/40"
+                      }`}
                     >
-                      <div className="text-xs font-bold flex items-center justify-between">
-                        <span>{slot.displayStart}</span>
-                        {slot.isPeak && !booked && (
-                          <span
-                            className={clsx(
-                              "text-[9px] uppercase px-1.5 py-0.5 rounded font-bold",
-                              isSelected
-                                ? "bg-bronze-glow text-midnight"
-                                : "bg-amber/20 text-amber-text"
-                            )}
-                          >
-                            Peak
-                          </span>
-                        )}
-                        {booked && (
-                          <span className="text-[10px] text-cue font-bold uppercase no-underline">
-                            Booked
-                          </span>
-                        )}
+                      <div className="text-xs uppercase tracking-wider">{dayLabel}</div>
+                      <div className="text-sm font-semibold mt-0.5">{dateStr}</div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Duration Selector */}
+            <div className="space-y-2">
+              <label className="text-xs font-bold uppercase tracking-wider text-ash flex items-center gap-1.5">
+                <Clock className="w-3.5 h-3.5 text-bronze" />
+                Duration
+              </label>
+              <div className="grid grid-cols-3 gap-2">
+                {[1, 2, 3].map((hrs) => (
+                  <button
+                    key={hrs}
+                    type="button"
+                    onClick={() => setDurationHours(hrs)}
+                    className={`py-2 px-3 rounded-xl border text-xs font-bold transition-all ${
+                      durationHours === hrs
+                        ? "bg-baize text-cream border-baize shadow-sm"
+                        : "bg-white border-black/10 text-ash hover:text-midnight"
+                    }`}
+                  >
+                    {hrs} Hour{hrs > 1 ? "s" : ""} (₹{hourlyRate * hrs})
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Slots Grid with 3 Tables Capacity */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-ash">
+                  Available Slots for {formatDateIST(selectedDate)}
+                </h3>
+                <span className="text-[11px] text-baize font-bold">
+                  ● Real-time capacity across 3 tables
+                </span>
+              </div>
+
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                {availableSlots.map((slot, idx) => {
+                  const { freeCount, isAvailable } = getSlotCapacity(slot);
+                  const isSelected = selectedSlot?.startISO === slot.startISO;
+
+                  return (
+                    <button
+                      key={idx}
+                      type="button"
+                      disabled={!isAvailable}
+                      onClick={() => handleSlotSelect(slot)}
+                      className={`p-3.5 rounded-2xl border text-left transition-all relative flex flex-col justify-between ${
+                        !isAvailable
+                          ? "bg-black/5 border-black/5 opacity-40 cursor-not-allowed"
+                          : isSelected
+                          ? "bg-bronze/10 border-bronze text-midnight ring-2 ring-bronze shadow-md"
+                          : "bg-white border-black/10 text-midnight hover:border-bronze hover:shadow-sm cursor-pointer"
+                      }`}
+                    >
+                      <div className="text-xs font-bold font-mono tracking-tight text-midnight">
+                        {slot.displayStart} – {slot.displayEnd}
                       </div>
-                      <div
-                        className={clsx(
-                          "text-[11px] mt-1",
-                          isSelected ? "text-cream/80" : "text-ash"
-                        )}
-                      >
-                        1 Hour Duration
+
+                      <div className="mt-2.5 flex items-center justify-between">
+                        <span
+                          className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                            !isAvailable
+                              ? "bg-red-500/10 text-red-500"
+                              : freeCount === 1
+                              ? "bg-amber/15 text-amber-700"
+                              : "bg-baize/15 text-baize"
+                          }`}
+                        >
+                          {!isAvailable
+                            ? "Sold Out"
+                            : freeCount === 1
+                            ? "1 Table Left!"
+                            : `${freeCount}/3 Free`}
+                        </span>
+
+                        <span className="text-xs text-bronze font-bold">
+                          Select →
+                        </span>
                       </div>
                     </button>
                   );
@@ -431,238 +507,244 @@ function BookingContent() {
           </div>
         )}
 
-        {/* STEP 3: DETAILS & REVIEW */}
-        {step === 3 && selectedTable && selectedSlot && (
+        {/* STEP 3: GUEST DETAILS & CONFIRM */}
+        {step === 3 && selectedSlot && (
           <div className="space-y-6 animate-in fade-in duration-300">
-            <h2 className="font-display text-xl font-bold text-midnight">
-              Step 3: Confirm Booking Details
-            </h2>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {/* Form Input */}
-              <div className="md:col-span-2 space-y-4 bg-cream-card p-6 rounded-2xl border border-black/10 shadow-sm">
-                <h3 className="font-bold text-sm text-midnight uppercase tracking-wider">
-                  Guest Information
-                </h3>
-
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-ash flex items-center gap-1.5">
-                    <User className="w-3.5 h-3.5 text-bronze" /> Full Name
-                  </label>
-                  <input
-                    type="text"
-                    value={guestName}
-                    onChange={(e) => setGuestName(e.target.value)}
-                    placeholder="Enter player name"
-                    className="w-full px-4 py-2.5 rounded-xl border border-black/15 bg-white text-midnight text-base sm:text-sm focus:outline-none focus:ring-2 focus:ring-baize"
-                  />
+            {/* Booking Summary Box */}
+            <div className="bg-white rounded-2xl border border-black/10 p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm">
+              <div className="space-y-1">
+                <span className="text-[10px] uppercase font-bold text-ash tracking-wider">
+                  Reservation Summary
+                </span>
+                <div className="font-display font-bold text-xl text-midnight">
+                  {selectedGameType === "snooker" ? "English Snooker (3 Tables)" : "American Pool (3 Tables)"}
                 </div>
-
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-ash flex items-center gap-1.5">
-                    <Phone className="w-3.5 h-3.5 text-bronze" /> Phone Number (For PIN SMS / WhatsApp)
-                  </label>
-                  <input
-                    type="tel"
-                    value={guestPhone}
-                    onChange={(e) => setGuestPhone(e.target.value)}
-                    placeholder="+91 98765 43210"
-                    className="w-full px-4 py-2.5 rounded-xl border border-black/15 bg-white text-midnight text-base sm:text-sm focus:outline-none focus:ring-2 focus:ring-baize"
-                  />
-                </div>
-
-                <div className="p-3 rounded-xl bg-baize/10 border border-baize/20 text-xs text-baize flex items-start gap-2">
-                  <ShieldCheck className="w-4 h-4 flex-shrink-0 mt-0.5" />
-                  <span>
-                    Your 6-digit PIN will be generated automatically upon confirmation. Show this PIN to staff on the floor to start your session clock.
-                  </span>
+                <div className="text-xs text-ash font-mono flex items-center gap-2">
+                  <Clock className="w-3.5 h-3.5 text-baize" />
+                  <span>{selectedSlot.displayStart} – {selectedSlot.displayEnd} ({formatDateIST(selectedDate)})</span>
                 </div>
               </div>
-
-              {/* Order Summary Box */}
-              <div className="bg-midnight text-cream p-6 rounded-2xl border border-midnight-line space-y-5 flex flex-col justify-between shadow-xl">
-                <div>
-                  <h3 className="font-display font-bold text-lg text-cream border-b border-midnight-line pb-3">
-                    Booking Summary
-                  </h3>
-
-                  <div className="mt-4 space-y-3 text-xs text-mist">
-                    <div className="flex justify-between">
-                      <span>Table</span>
-                      <span className="font-semibold text-cream text-right">
-                        {selectedTable.name}
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Date</span>
-                      <span className="font-semibold text-cream">
-                        {formatDateIST(selectedDate)}
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Slot Time</span>
-                      <span className="font-semibold text-cream">
-                        {selectedSlot.label}
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Duration</span>
-                      <span className="font-semibold text-cream">60 Minutes</span>
-                    </div>
-                    <div className="flex justify-between border-t border-midnight-line pt-3 text-sm">
-                      <span className="text-cream font-bold">Total Payable</span>
-                      <span className="font-display text-lg font-bold text-bronze-glow tabular-nums">
-                        ₹{selectedTable.type === "snooker" ? 450 : 300}
-                      </span>
-                    </div>
-                    <p className="text-[10px] text-mist/70 italic text-right">
-                      *Pay at venue via Cash, UPI, or Card
-                    </p>
-                  </div>
-                </div>
-
-                <div className="space-y-2 pt-4">
-                  <Button
-                    variant="primary-dark"
-                    size="lg"
-                    className="w-full shadow-lamp"
-                    isLoading={isSubmitting}
-                    onClick={handleConfirmBooking}
-                  >
-                    Confirm & Generate PIN
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="w-full text-mist text-xs"
-                    onClick={() => setStep(2)}
-                  >
-                    Back to Slot Selection
-                  </Button>
+              <div className="text-left sm:text-right">
+                <span className="text-[10px] uppercase font-bold text-ash tracking-wider">Total Charge</span>
+                <div className="text-2xl font-display font-black text-bronze tabular-nums">
+                  ₹{totalAmount}
                 </div>
               </div>
             </div>
-          </div>
-        )}
 
-        {/* STEP 4: CONFIRMATION & SECRET PIN CARD */}
-        {step === 4 && confirmedBooking && (
-          <div className="max-w-xl mx-auto space-y-6 animate-in zoom-in-95 duration-300">
-            <div className="text-center space-y-2">
-              <div className="w-16 h-16 rounded-full bg-baize/20 border-2 border-baize text-baize flex items-center justify-center mx-auto mb-3">
-                <Check className="w-8 h-8 stroke-[3]" />
-              </div>
-              <h2 className="font-display text-3xl font-bold text-midnight">
-                You&apos;re Booked!
-              </h2>
-              <p className="text-sm text-ash">
-                Your table is reserved. Show this PIN to the staff concierge at the parlour desk.
-              </p>
-            </div>
+            {/* Customer Details Form */}
+            <Card className="bg-white p-6 space-y-4 border-black/10 shadow-card rounded-2xl">
+              <h3 className="font-display text-lg font-bold text-midnight">
+                Guest Player Details
+              </h3>
 
-            {/* Secret PIN Pass Card */}
-            <div className="bg-midnight text-cream p-7 rounded-2xl border-2 border-bronze-glow shadow-2xl relative overflow-hidden space-y-6">
-              {/* Background badge */}
-              <div className="flex items-center justify-between border-b border-midnight-line pb-4">
+              <div className="space-y-4">
                 <div>
-                  <span className="text-[10px] uppercase font-bold tracking-widest text-mist">
-                    CONFIRMATION PASS
-                  </span>
-                  <div className="font-display text-xl font-bold text-cream">
-                    Cue Nation Parlour
+                  <label className="block text-xs font-bold text-ash uppercase tracking-wider mb-1">
+                    Your Full Name *
+                  </label>
+                  <div className="relative">
+                    <User className="w-4 h-4 text-ash absolute left-3 top-3.5" />
+                    <input
+                      type="text"
+                      required
+                      placeholder="e.g. Parth Racka"
+                      value={guestName}
+                      onChange={(e) => setGuestName(e.target.value)}
+                      className="w-full bg-cream-soft border border-black/10 rounded-xl pl-9 pr-3 py-2.5 text-sm text-midnight placeholder-ash/50 focus:border-bronze focus:outline-none"
+                    />
                   </div>
                 </div>
-                <div className="text-right">
-                  <span className="text-[10px] uppercase font-bold tracking-widest text-mist">
-                    BOOKING CODE
-                  </span>
-                  <div className="font-mono text-base font-bold text-bronze-glow flex items-center gap-1.5">
-                    {confirmedBooking.booking.booking_code}
+
+                <div>
+                  <label className="block text-xs font-bold text-ash uppercase tracking-wider mb-1">
+                    Mobile Phone Number (For PIN confirmation) *
+                  </label>
+                  <div className="relative">
+                    <Phone className="w-4 h-4 text-ash absolute left-3 top-3.5" />
+                    <input
+                      type="tel"
+                      required
+                      placeholder="e.g. 9876543210"
+                      value={guestPhone}
+                      onChange={(e) => setGuestPhone(e.target.value)}
+                      className="w-full bg-cream-soft border border-black/10 rounded-xl pl-9 pr-3 py-2.5 text-sm text-midnight placeholder-ash/50 focus:border-bronze focus:outline-none"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-ash uppercase tracking-wider mb-1">
+                    Email Address (Optional)
+                  </label>
+                  <input
+                    type="email"
+                    placeholder="e.g. player@example.com"
+                    value={guestEmail}
+                    onChange={(e) => setGuestEmail(e.target.value)}
+                    className="w-full bg-cream-soft border border-black/10 rounded-xl px-3 py-2.5 text-sm text-midnight placeholder-ash/50 focus:border-bronze focus:outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-ash uppercase tracking-wider mb-2">
+                    Payment Preference
+                  </label>
+                  <div className="grid grid-cols-2 gap-3">
                     <button
-                      onClick={() =>
-                        copyToClipboard(confirmedBooking.booking.booking_code, "code")
-                      }
-                      className="p-1 hover:text-cream text-mist cursor-pointer"
-                      title="Copy code"
+                      type="button"
+                      onClick={() => setPaymentMethod("pay_at_venue")}
+                      className={`p-3 rounded-xl border text-left transition-all ${
+                        paymentMethod === "pay_at_venue"
+                          ? "bg-bronze/10 border-bronze text-midnight font-bold shadow-sm"
+                          : "bg-cream-soft border-black/10 text-ash"
+                      }`}
                     >
-                      {hasCopiedCode ? (
-                        <Check className="w-3.5 h-3.5 text-baize-light" />
-                      ) : (
-                        <Copy className="w-3.5 h-3.5" />
-                      )}
+                      <div className="text-xs font-bold text-midnight">Pay at Counter</div>
+                      <div className="text-[11px] text-ash mt-0.5">Cash / UPI upon check-in</div>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setPaymentMethod("online")}
+                      className={`p-3 rounded-xl border text-left transition-all ${
+                        paymentMethod === "online"
+                          ? "bg-bronze/10 border-bronze text-midnight font-bold shadow-sm"
+                          : "bg-cream-soft border-black/10 text-ash"
+                      }`}
+                    >
+                      <div className="text-xs font-bold text-midnight">Online Prepay</div>
+                      <div className="text-[11px] text-ash mt-0.5">UPI / Net Banking</div>
                     </button>
                   </div>
                 </div>
               </div>
 
-              {/* BIG PIN HIGHLIGHT */}
-              <div className="bg-midnight-card rounded-xl p-5 border border-midnight-line text-center space-y-2">
-                <span className="text-xs uppercase font-bold text-bronze-glow tracking-widest flex items-center justify-center gap-1.5">
-                  <KeyRound className="w-3.5 h-3.5" /> 6-DIGIT CHECK-IN PIN
-                </span>
-                <div className="font-mono text-4xl sm:text-5xl font-black tracking-[0.25em] text-cream tabular-nums">
+              <div className="pt-4 flex items-center justify-between border-t border-black/10">
+                <Button
+                  variant="ghost"
+                  size="md"
+                  onClick={() => setStep(2)}
+                  className="gap-1.5"
+                >
+                  <ArrowLeft className="w-4 h-4" /> Back to Slots
+                </Button>
+
+                <Button
+                  variant="primary"
+                  size="md"
+                  disabled={isSubmitting}
+                  onClick={handleConfirmBooking}
+                  className="gap-2 shadow-md"
+                >
+                  {isSubmitting ? (
+                    <span>Securing Table...</span>
+                  ) : (
+                    <>
+                      <KeyRound className="w-4 h-4" />
+                      Confirm & Generate PIN
+                    </>
+                  )}
+                </Button>
+              </div>
+            </Card>
+          </div>
+        )}
+
+        {/* STEP 4: INSTANT PIN PRESENTATION */}
+        {step === 4 && confirmedBooking && (
+          <div className="space-y-6 max-w-lg mx-auto text-center animate-in zoom-in-95 duration-400">
+            <div className="w-16 h-16 rounded-full bg-baize/15 text-baize flex items-center justify-center mx-auto shadow-sm">
+              <CheckCheck className="w-8 h-8" />
+            </div>
+
+            <div className="space-y-1">
+              <h2 className="font-display text-2xl sm:text-3xl font-bold text-midnight">
+                Booking Confirmed!
+              </h2>
+              <p className="text-xs text-ash">
+                Your reservation has been locked into the system. Tell your PIN to the staff upon arrival to automatically allocate your table.
+              </p>
+            </div>
+
+            {/* Glowing PIN Card */}
+            <div className="bg-midnight text-cream rounded-3xl p-6 sm:p-8 border border-bronze-glow/40 shadow-2xl space-y-4">
+              <span className="text-[11px] uppercase tracking-[0.2em] font-bold text-bronze-glow">
+                Your Check-In PIN
+              </span>
+
+              <div className="flex items-center justify-center gap-3">
+                <div className="font-mono text-4xl sm:text-5xl font-black tracking-[0.3em] bg-black/40 px-6 py-3 rounded-2xl border border-bronze-glow/50 text-cream select-all">
                   {confirmedBooking.pin}
                 </div>
-                <p className="text-[11px] text-mist">
-                  Shown once now and securely retrievable in your profile
-                </p>
-                <div className="pt-2">
-                  <Button
-                    variant="primary-dark"
-                    size="sm"
-                    onClick={() => copyToClipboard(confirmedBooking.pin, "pin")}
-                    className="gap-1.5 text-xs"
-                  >
-                    {hasCopiedPin ? (
-                      <>
-                        <Check className="w-3.5 h-3.5" /> PIN Copied
-                      </>
-                    ) : (
-                      <>
-                        <Copy className="w-3.5 h-3.5" /> Copy PIN to Clipboard
-                      </>
-                    )}
-                  </Button>
-                </div>
+
+                <button
+                  type="button"
+                  onClick={() => copyToClipboard(confirmedBooking.pin, "pin")}
+                  className="p-3.5 rounded-2xl bg-bronze hover:bg-bronze-glow text-midnight font-bold transition-all shadow-md shrink-0 cursor-pointer"
+                  title="Copy PIN"
+                >
+                  {hasCopiedPin ? <Check className="w-5 h-5" /> : <Copy className="w-5 h-5" />}
+                </button>
               </div>
 
-              {/* Table and Time Meta */}
-              <div className="grid grid-cols-2 gap-4 text-xs text-mist border-t border-midnight-line pt-4">
-                <div>
-                  <span className="text-mist/70">Table</span>
-                  <div className="text-cream font-bold mt-0.5">
-                    {selectedTable?.name}
-                  </div>
+              {hasCopiedPin && (
+                <div className="text-xs font-semibold text-baize-light animate-pulse">
+                  ✓ PIN copied to clipboard!
                 </div>
+              )}
+
+              {/* Instructions */}
+              <div className="bg-baize/20 border border-baize/40 rounded-2xl p-4 text-left flex items-start gap-3 mt-4 text-xs text-cream/90 leading-relaxed">
+                <KeyRound className="w-5 h-5 text-baize-light shrink-0 mt-0.5" />
                 <div>
-                  <span className="text-mist/70">Slot & Date</span>
-                  <div className="text-cream font-bold mt-0.5">
-                    {selectedSlot?.label} · {formatDateIST(selectedDate)}
-                  </div>
+                  <strong className="text-baize-light">How it works:</strong> When you arrive at Cue Nation, simply say this PIN <code className="bg-midnight px-1.5 py-0.5 rounded text-bronze-glow font-bold">{confirmedBooking.pin}</code> to the staff. The system will automatically allocate an available {selectedGameType === "snooker" ? "Snooker" : "Pool"} table and start your session!
                 </div>
               </div>
             </div>
 
+            {/* Summary Details */}
+            <div className="bg-white rounded-2xl border border-black/10 p-4 text-xs space-y-2 text-left">
+              <div className="flex justify-between items-center py-1 border-b border-black/5">
+                <span className="text-ash">Booking Code</span>
+                <span className="font-mono font-bold text-midnight">{confirmedBooking.booking.booking_code}</span>
+              </div>
+              <div className="flex justify-between items-center py-1 border-b border-black/5">
+                <span className="text-ash">Discipline</span>
+                <span className="font-bold text-midnight capitalize">{selectedGameType} (3 Tables Sync)</span>
+              </div>
+              <div className="flex justify-between items-center py-1 border-b border-black/5">
+                <span className="text-ash">Scheduled Time</span>
+                <span className="font-mono text-midnight">{selectedSlot?.displayStart} – {selectedSlot?.displayEnd}</span>
+              </div>
+              <div className="flex justify-between items-center py-1">
+                <span className="text-ash">Amount</span>
+                <span className="font-bold text-bronze text-sm">₹{confirmedBooking.booking.amount}</span>
+              </div>
+            </div>
+
+            {/* Action Buttons */}
             <div className="flex flex-col sm:flex-row items-center gap-3 pt-2">
               <Button
-                variant="primary"
+                variant="outline"
                 size="md"
-                onClick={() => (window.location.href = "/profile")}
-                className="w-full gap-2"
+                onClick={() => (window.location.href = `/booking/${confirmedBooking.booking.id}`)}
+                className="w-full sm:flex-1 justify-center text-xs"
               >
-                <User className="w-4 h-4" /> View in My Profile
+                View Full Pass
               </Button>
+
               <Button
-                variant="secondary"
+                variant="primary"
                 size="md"
                 onClick={() => {
                   setStep(1);
                   setSelectedSlot(null);
                   setConfirmedBooking(null);
                 }}
-                className="w-full gap-2"
+                className="w-full sm:flex-1 justify-center text-xs"
               >
-                <RefreshCw className="w-4 h-4" /> Book Another Table
+                Book Another Slot
               </Button>
             </div>
           </div>

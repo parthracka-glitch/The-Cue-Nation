@@ -30,8 +30,8 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const { tableId, pin, bookingCode, isWalkIn } = body;
 
-    if (!tableId) {
-      return NextResponse.json({ error: "tableId is required" }, { status: 400 });
+    if (!tableId && !pin && !bookingCode) {
+      return NextResponse.json({ error: "tableId or pin is required" }, { status: 400 });
     }
 
     const result = startSession({

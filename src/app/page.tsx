@@ -6,11 +6,10 @@ import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { StatusBadge } from "@/components/ui/Badge";
 import { BilliardsHero } from "@/components/billiards/BilliardsHero";
-import { PoolShowcaseCards } from "@/components/pools/PoolShowcaseCards";
+import { GameFlashcardsBookingSection } from "@/components/booking/GameFlashcardsBookingSection";
 import { venueStore } from "@/lib/store/venueStore";
-import { GameTable, MenuItem } from "@/types/database";
+import { MenuItem } from "@/types/database";
 import {
-  Calendar,
   Sparkles,
   Coffee,
   CheckCircle2,
@@ -18,147 +17,27 @@ import {
   ShieldCheck,
   Zap,
   Users,
-  Compass,
+  Calendar,
 } from "lucide-react";
 
 export default function HomePage() {
-  const [tables, setTables] = useState<GameTable[]>([]);
   const [menu, setMenu] = useState<MenuItem[]>([]);
-  const [tableFilter, setTableFilter] = useState<"all" | "pool" | "snooker">("all");
 
   useEffect(() => {
-    setTables(venueStore.getTables());
     setMenu(venueStore.getMenu());
     const unsub = venueStore.subscribe(() => {
-      setTables(venueStore.getTables());
       setMenu(venueStore.getMenu());
     });
     return unsub;
   }, []);
-
-  const filteredTables = tables.filter((t) => {
-    if (tableFilter === "all") return true;
-    return t.type === tableFilter;
-  });
 
   return (
     <div className="flex flex-col w-full">
       {/* 1. MASTER BILLIARDS HERO SECTION */}
       <BilliardsHero />
 
-      {/* 2. CORE INTERACTIVE CARDS: MAIN POOL & SMOKER POOL */}
-      <PoolShowcaseCards />
-
-      {/* 3. LIVE VENUE ARENAS & SNOOKER TABLES */}
-      <section id="tables" className="py-20 bg-cream-soft text-midnight">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
-            <div>
-              <span className="text-xs uppercase tracking-[0.2em] font-bold text-baize">
-                Championship Floor
-              </span>
-              <h2 className="font-display text-3xl sm:text-4xl font-bold text-midnight mt-1">
-                Tables & Live Availability
-              </h2>
-              <p className="text-ash text-sm sm:text-base mt-2 max-w-xl">
-                Every table is synced in real-time. Select a table to view available hourly slots and reserve instantly.
-              </p>
-            </div>
-
-            {/* Filter buttons */}
-            <div className="inline-flex p-1 bg-cream-card rounded-xl border border-black/10 self-start md:self-auto">
-              {(["all", "pool", "snooker"] as const).map((mode) => (
-                <button
-                  key={mode}
-                  onClick={() => setTableFilter(mode)}
-                  className={`px-4 py-2 text-xs font-semibold rounded-lg capitalize transition-all cursor-pointer ${
-                    tableFilter === mode
-                      ? "bg-bronze text-cream shadow-sm"
-                      : "text-ash hover:text-midnight"
-                  }`}
-                >
-                  {mode === "all" ? "All Tables (6)" : `${mode} Tables`}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Tables Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {filteredTables.map((table) => {
-              const isSnooker = table.type === "snooker";
-              const hourlyPrice = isSnooker ? 450 : 300;
-              const photo = isSnooker
-                ? "https://images.unsplash.com/photo-1596727147705-61a532a659bd?auto=format&fit=crop&w=800&q=80"
-                : "https://images.unsplash.com/photo-1534423861386-85a16f5d13fd?auto=format&fit=crop&w=800&q=80";
-
-              return (
-                <Card
-                  key={table.id}
-                  variant="light"
-                  className="flex flex-col justify-between overflow-hidden p-0 border border-black/10 hover:shadow-xl transition-all duration-300 group"
-                >
-                  {/* Image banner with overlay */}
-                  <div className="relative h-48 w-full overflow-hidden bg-midnight">
-                    <img
-                      src={photo}
-                      alt={table.name}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-90"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-midnight/90 via-midnight/20 to-transparent" />
-                    
-                    <div className="absolute top-3 left-3">
-                      <StatusBadge status={table.status} isDark />
-                    </div>
-
-                    <div className="absolute top-3 right-3 bg-midnight/70 backdrop-blur-md px-2.5 py-1 rounded-full text-xs font-semibold text-cream border border-midnight-line">
-                      {isSnooker ? "12ft Full Size" : "9ft Tournament"}
-                    </div>
-
-                    <div className="absolute bottom-3 left-4 right-4 flex items-baseline justify-between text-cream">
-                      <div>
-                        <span className="text-xs uppercase tracking-wider text-mist">Starting from</span>
-                        <div className="text-xl font-bold font-display text-bronze-glow tabular-nums">
-                          ₹{hourlyPrice}
-                          <span className="text-xs font-normal text-mist">/hour</span>
-                        </div>
-                      </div>
-                      <span className="text-xs text-mist font-medium">Standard Hours</span>
-                    </div>
-                  </div>
-
-                  {/* Body Info */}
-                  <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
-                    <div>
-                      <h3 className="font-display text-lg font-bold text-midnight group-hover:text-baize transition-colors">
-                        {table.name}
-                      </h3>
-                      <p className="text-xs text-ash mt-1 leading-relaxed">
-                        {isSnooker
-                          ? "English tournament slate, hand-pressed Northern rubber cushions, and 100% wool Strachan 6811 baize."
-                          : "Laser-leveled three-piece Brazilian slate, drop pockets, and super-responsive K55 profile cushions."}
-                      </p>
-                    </div>
-
-                    <div className="pt-2 border-t border-black/5 flex items-center justify-between">
-                      <span className="text-xs text-ash flex items-center gap-1.5 font-medium">
-                        <Zap className="w-3.5 h-3.5 text-baize" />
-                        Single PIN check-in
-                      </span>
-                      <Link href={`/book?tableId=${table.id}`}>
-                        <Button variant="primary" size="sm" className="gap-1.5">
-                          Book Table
-                          <ArrowRight className="w-3.5 h-3.5" />
-                        </Button>
-                      </Link>
-                    </div>
-                  </div>
-                </Card>
-              );
-            })}
-          </div>
-        </div>
-      </section>
+      {/* 2. TWO MASTER FLASHCARDS (POOL & SNOOKER) WITH 3-TABLE SYNCHRONIZED BOOKING & PIN GENERATION */}
+      <GameFlashcardsBookingSection />
 
       {/* 3. ARTISANAL CAFÉ & QR ORDERING */}
       <section id="cafe" className="py-20 bg-midnight text-cream relative overflow-hidden">
