@@ -1,6 +1,23 @@
 "use client";
 
-import { GameTable, Booking, Session, Order, Bill, MenuItem, Expense, TableStatus, OrderStatus } from "@/types/database";
+import {
+  GameTable,
+  Booking,
+  Session,
+  Order,
+  Bill,
+  MenuItem,
+  Expense,
+  TableStatus,
+  OrderStatus,
+  WaitingListEntry,
+  ShiftHandover,
+  DailyClosing,
+  MembershipPlan,
+  CustomerMembership,
+  RewardLedgerEntry,
+  MaintenanceRecord,
+} from "@/types/database";
 
 const INITIAL_TABLES: GameTable[] = [
   {
@@ -263,6 +280,48 @@ class VenueStore {
   private bills: Bill[] = [...INITIAL_BILLS];
   private expenses: Expense[] = [...INITIAL_EXPENSES];
   private menu: MenuItem[] = [...INITIAL_MENU];
+  private waitingList: WaitingListEntry[] = [];
+  private shiftHandovers: ShiftHandover[] = [];
+  private dailyClosings: DailyClosing[] = [];
+  private membershipPlans: MembershipPlan[] = [
+    {
+      id: "plan-silver",
+      name: "Silver Cueist",
+      tier: "Silver",
+      fee: 1499,
+      duration_days: 30,
+      discount_percentage: 10,
+      points_multiplier: 1,
+      perks: ["10% off table time", "Priority booking (3 days)", "1 Reward Point per ₹10"],
+      active: true,
+    },
+    {
+      id: "plan-gold",
+      name: "Gold Champion",
+      tier: "Gold",
+      fee: 3499,
+      duration_days: 90,
+      discount_percentage: 15,
+      points_multiplier: 1.5,
+      perks: ["15% off table time & café", "Complimentary locker", "Priority booking (7 days)", "1.5x Reward Points"],
+      active: true,
+    },
+    {
+      id: "plan-platinum",
+      name: "Platinum Master",
+      tier: "Platinum",
+      fee: 9999,
+      duration_days: 365,
+      discount_percentage: 20,
+      points_multiplier: 2,
+      perks: ["20% off all charges", "VIP lounge access", "Complimentary cue storage", "2x Reward Points"],
+      active: true,
+    },
+  ];
+  private customerMemberships: CustomerMembership[] = [];
+  private rewardLedger: RewardLedgerEntry[] = [];
+  private maintenanceRecords: MaintenanceRecord[] = [];
+  private isTabletMode: boolean = false;
   private listeners: Set<() => void> = new Set();
 
   constructor() {
@@ -281,6 +340,13 @@ class VenueStore {
       localStorage.setItem("cn_bills", JSON.stringify(this.bills));
       localStorage.setItem("cn_expenses", JSON.stringify(this.expenses));
       localStorage.setItem("cn_menu", JSON.stringify(this.menu));
+      localStorage.setItem("cn_waiting_list", JSON.stringify(this.waitingList));
+      localStorage.setItem("cn_shift_handovers", JSON.stringify(this.shiftHandovers));
+      localStorage.setItem("cn_daily_closings", JSON.stringify(this.dailyClosings));
+      localStorage.setItem("cn_customer_memberships", JSON.stringify(this.customerMemberships));
+      localStorage.setItem("cn_reward_ledger", JSON.stringify(this.rewardLedger));
+      localStorage.setItem("cn_maintenance", JSON.stringify(this.maintenanceRecords));
+      localStorage.setItem("cn_tablet_mode", JSON.stringify(this.isTabletMode));
     } catch {
       // ignore storage errors
     }
@@ -289,7 +355,7 @@ class VenueStore {
 
   private loadFromStorage() {
     try {
-      const CURRENT_STORE_VERSION = "v4_3pool_3snooker";
+      const CURRENT_STORE_VERSION = "v5_qnation_master";
       const ver = localStorage.getItem("cn_store_ver");
       const t = localStorage.getItem("cn_tables");
 
@@ -308,6 +374,13 @@ class VenueStore {
       const bi = localStorage.getItem("cn_bills");
       const e = localStorage.getItem("cn_expenses");
       const m = localStorage.getItem("cn_menu");
+      const wl = localStorage.getItem("cn_waiting_list");
+      const sh = localStorage.getItem("cn_shift_handovers");
+      const dc = localStorage.getItem("cn_daily_closings");
+      const cm = localStorage.getItem("cn_customer_memberships");
+      const rl = localStorage.getItem("cn_reward_ledger");
+      const mt = localStorage.getItem("cn_maintenance");
+      const tm = localStorage.getItem("cn_tablet_mode");
 
       if (b) this.bookings = JSON.parse(b);
       if (s) this.sessions = JSON.parse(s);
@@ -315,6 +388,13 @@ class VenueStore {
       if (bi) this.bills = JSON.parse(bi);
       if (e) this.expenses = JSON.parse(e);
       if (m) this.menu = JSON.parse(m);
+      if (wl) this.waitingList = JSON.parse(wl);
+      if (sh) this.shiftHandovers = JSON.parse(sh);
+      if (dc) this.dailyClosings = JSON.parse(dc);
+      if (cm) this.customerMemberships = JSON.parse(cm);
+      if (rl) this.rewardLedger = JSON.parse(rl);
+      if (mt) this.maintenanceRecords = JSON.parse(mt);
+      if (tm) this.isTabletMode = JSON.parse(tm);
     } catch {
       // fallback to initial
       this.tables = [...INITIAL_TABLES];
@@ -822,6 +902,394 @@ class VenueStore {
       return { success: true, orderId };
     }
     return this.placeOrder(arg1, arg2 || []);
+  }
+
+  // --- WAITING LIST MODULE ---
+  getWaitingList(): WaitingListEntry[] {
+    return [...this.waitingList];
+  }
+
+  getEstimatedWaitMinutes(discipline: "pool" | "snooker"): number {
+    const candidateTables = this.tables.filter((t) => t.type === discipline && t.active);
+    const activeSessions = this.sessions.filter(
+      (s) => candidateTables.some((t) => t.id === s.table_id) && !s.ended_at
+    );
+
+    // If any table is currently free, wait time is 0
+    if (activeSessions.length < candidateTables.length) {
+      return 0;
+    }
+
+    // Otherwise find the session with the least remaining time
+    const now = Date.now();
+    let minRemainingMinutes = 60;
+
+    activeSessions.forEach((s) => {
+      const elapsedMins = Math.floor((now - new Date(s.started_at).getTime()) / 60000);
+      const totalAllocatedMins = 60 + (s.extra_minutes || 0);
+      const remainingMins = Math.max(5, totalAllocatedMins - elapsedMins);
+      if (remainingMins < minRemainingMinutes) {
+        minRemainingMinutes = remainingMins;
+      }
+    });
+
+    return minRemainingMinutes;
+  }
+
+  addToWaitingList(params: {
+    customerName: string;
+    customerPhone: string;
+    discipline: "pool" | "snooker";
+    partySize?: number;
+    preferredDuration?: number;
+    notes?: string;
+  }): WaitingListEntry {
+    const estimatedWait = this.getEstimatedWaitMinutes(params.discipline);
+    const entry: WaitingListEntry = {
+      id: `wl-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+      customer_name: params.customerName.trim(),
+      customer_phone: params.customerPhone.trim(),
+      discipline: params.discipline,
+      party_size: params.partySize || 2,
+      preferred_duration: params.preferredDuration || 60,
+      created_at: new Date().toISOString(),
+      status: "waiting",
+      estimated_wait_minutes: estimatedWait,
+      notes: params.notes || "",
+    };
+
+    this.waitingList.unshift(entry);
+    this.saveToStorage();
+    return entry;
+  }
+
+  updateWaitingListStatus(
+    id: string,
+    status: WaitingListEntry["status"],
+    allocatedTableId?: string
+  ): boolean {
+    const entry = this.waitingList.find((w) => w.id === id);
+    if (!entry) return false;
+    entry.status = status;
+    if (allocatedTableId) entry.allocated_table_id = allocatedTableId;
+    this.saveToStorage();
+    return true;
+  }
+
+  // --- SHIFT HANDOVER MODULE ---
+  getShiftHandovers(): ShiftHandover[] {
+    return [...this.shiftHandovers];
+  }
+
+  submitShiftHandover(data: {
+    outgoingStaffId: string;
+    outgoingStaffName: string;
+    cashDrawerActual: number;
+    operationalNotes: string;
+  }): ShiftHandover {
+    // Calculate expected cash from bills paid in cash today
+    const todayStr = new Date().toISOString().split("T")[0];
+    const cashBills = this.bills.filter(
+      (b) => b.paid && b.pay_mode === "cash" && b.paid_at && b.paid_at.startsWith(todayStr!)
+    );
+    const expectedCash = cashBills.reduce((acc, b) => acc + b.total, 0);
+    const completedSessionsCount = this.sessions.filter(
+      (s) => s.ended_at && s.ended_at.startsWith(todayStr!)
+    ).length;
+    const unpaidBillsCount = this.bills.filter((b) => !b.paid).length;
+
+    const handover: ShiftHandover = {
+      id: `sh-${Date.now()}`,
+      shift_date: todayStr!,
+      outgoing_staff_id: data.outgoingStaffId,
+      outgoing_staff_name: data.outgoingStaffName,
+      cash_drawer_expected: expectedCash,
+      cash_drawer_actual: data.cashDrawerActual,
+      cash_variance: data.cashDrawerActual - expectedCash,
+      completed_sessions_count: completedSessionsCount,
+      unpaid_bills_count: unpaidBillsCount,
+      operational_notes: data.operationalNotes,
+      status: "submitted",
+      created_at: new Date().toISOString(),
+    };
+
+    this.shiftHandovers.unshift(handover);
+    this.saveToStorage();
+    return handover;
+  }
+
+  acknowledgeShiftHandover(id: string, staffId: string, staffName: string): boolean {
+    const handover = this.shiftHandovers.find((sh) => sh.id === id);
+    if (!handover) return false;
+    handover.incoming_staff_id = staffId;
+    handover.incoming_staff_name = staffName;
+    handover.status = "acknowledged";
+    handover.acknowledged_at = new Date().toISOString();
+    this.saveToStorage();
+    return true;
+  }
+
+  // --- DAILY CLOSING & CASH RECONCILIATION ---
+  getDailyClosings(): DailyClosing[] {
+    return [...this.dailyClosings];
+  }
+
+  computeDailyClosingSummary(dateStr?: string) {
+    const targetDate = dateStr || new Date().toISOString().split("T")[0]!;
+    const dayBills = this.bills.filter((b) => {
+      const bDate = (b.paid_at || b.created_at || "").split("T")[0];
+      return bDate === targetDate;
+    });
+
+    const daySessions = this.sessions.filter((s) => {
+      const sDate = (s.ended_at || s.started_at || "").split("T")[0];
+      return sDate === targetDate;
+    });
+
+    let cashCollected = 0;
+    let upiCollected = 0;
+    let cardCollected = 0;
+    let onlineCollected = 0;
+    let outstandingBalance = 0;
+    let totalRevenue = 0;
+
+    dayBills.forEach((b) => {
+      totalRevenue += b.total;
+      if (b.paid) {
+        if (b.pay_mode === "cash") cashCollected += b.total;
+        else if (b.pay_mode === "upi") upiCollected += b.total;
+        else if (b.pay_mode === "card") cardCollected += b.total;
+        else onlineCollected += b.total;
+      } else {
+        outstandingBalance += b.balance_due || b.total;
+      }
+    });
+
+    return {
+      targetDate,
+      totalSessions: daySessions.length,
+      totalRevenue,
+      cashCollected,
+      upiCollected,
+      cardCollected,
+      onlineCollected,
+      refundsTotal: 0,
+      discountsTotal: 0,
+      outstandingBalance,
+      expectedCash: cashCollected,
+    };
+  }
+
+  submitDailyClosing(data: {
+    closedById: string;
+    closedByName: string;
+    actualCash: number;
+    closingNotes?: string;
+    dateStr?: string;
+  }): DailyClosing {
+    const summary = this.computeDailyClosingSummary(data.dateStr);
+    const variance = data.actualCash - summary.expectedCash;
+
+    const closing: DailyClosing = {
+      id: `dc-${Date.now()}`,
+      closing_date: summary.targetDate,
+      closed_by_id: data.closedById,
+      closed_by_name: data.closedByName,
+      total_sessions: summary.totalSessions,
+      total_revenue: summary.totalRevenue,
+      cash_collected: summary.cashCollected,
+      upi_collected: summary.upiCollected,
+      card_collected: summary.cardCollected,
+      online_collected: summary.onlineCollected,
+      refunds_total: 0,
+      discounts_total: 0,
+      outstanding_balance: summary.outstandingBalance,
+      expected_cash: summary.expectedCash,
+      actual_cash: data.actualCash,
+      cash_variance: variance,
+      closing_notes: data.closingNotes || "",
+      status: Math.abs(variance) > 0 ? "discrepancy" : "submitted",
+      created_at: new Date().toISOString(),
+    };
+
+    this.dailyClosings.unshift(closing);
+    this.saveToStorage();
+    return closing;
+  }
+
+  approveDailyClosing(id: string, approvedBy: string): boolean {
+    const closing = this.dailyClosings.find((c) => c.id === id);
+    if (!closing) return false;
+    closing.status = "approved";
+    closing.approved_by = approvedBy;
+    closing.approved_at = new Date().toISOString();
+    this.saveToStorage();
+    return true;
+  }
+
+  // --- MEMBERSHIP & REWARDS MODULE ---
+  getMembershipPlans(): MembershipPlan[] {
+    return [...this.membershipPlans];
+  }
+
+  getCustomerMemberships(): CustomerMembership[] {
+    return [...this.customerMemberships];
+  }
+
+  getMembershipForCustomer(phone: string): CustomerMembership | undefined {
+    return this.customerMemberships.find(
+      (m) => m.customer_phone.replace(/\D/g, "") === phone.replace(/\D/g, "") && m.active
+    );
+  }
+
+  enrollMembership(params: {
+    customerPhone: string;
+    customerName: string;
+    planId: string;
+  }): CustomerMembership | null {
+    const plan = this.membershipPlans.find((p) => p.id === params.planId);
+    if (!plan) return null;
+
+    const now = new Date();
+    const expiry = new Date(now.getTime() + plan.duration_days * 24 * 60 * 60 * 1000);
+
+    const membership: CustomerMembership = {
+      id: `mem-${Date.now()}`,
+      customer_phone: params.customerPhone.trim(),
+      customer_name: params.customerName.trim(),
+      plan_id: plan.id,
+      plan_name: plan.name,
+      tier: plan.tier,
+      start_date: now.toISOString(),
+      expiry_date: expiry.toISOString(),
+      points_balance: 100, // Welcome points
+      active: true,
+      created_at: now.toISOString(),
+    };
+
+    this.customerMemberships.unshift(membership);
+    this.addRewardPoints(params.customerPhone, 100, `Welcome bonus for ${plan.name} enrollment`);
+    this.saveToStorage();
+    return membership;
+  }
+
+  getRewardLedger(customerPhone?: string): RewardLedgerEntry[] {
+    if (!customerPhone) return [...this.rewardLedger];
+    const cleanPhone = customerPhone.replace(/\D/g, "");
+    return this.rewardLedger.filter((r) => r.customer_phone.replace(/\D/g, "") === cleanPhone);
+  }
+
+  addRewardPoints(phone: string, points: number, note?: string): void {
+    const entry: RewardLedgerEntry = {
+      id: `rw-${Date.now()}`,
+      customer_phone: phone.trim(),
+      points,
+      type: "earned",
+      note: note || "Points earned on table spend",
+      created_at: new Date().toISOString(),
+    };
+    this.rewardLedger.unshift(entry);
+
+    const mem = this.getMembershipForCustomer(phone);
+    if (mem) {
+      mem.points_balance += points;
+    }
+    this.saveToStorage();
+  }
+
+  redeemRewardPoints(phone: string, points: number): boolean {
+    const mem = this.getMembershipForCustomer(phone);
+    if (!mem || mem.points_balance < points) return false;
+
+    mem.points_balance -= points;
+    this.rewardLedger.unshift({
+      id: `rw-${Date.now()}`,
+      customer_phone: phone.trim(),
+      points: -points,
+      type: "redeemed",
+      note: `Redeemed ${points} points against playing charges`,
+      created_at: new Date().toISOString(),
+    });
+
+    this.saveToStorage();
+    return true;
+  }
+
+  // --- MAINTENANCE & CONFLICT CHECKING ---
+  getMaintenanceRecords(): MaintenanceRecord[] {
+    return [...this.maintenanceRecords];
+  }
+
+  checkMaintenanceConflict(
+    tableId: string,
+    startISO: string,
+    endISO: string
+  ): { hasConflict: boolean; conflictingBookings: Booking[] } {
+    const reqStartMs = new Date(startISO).getTime();
+    const reqEndMs = new Date(endISO).getTime();
+
+    const conflicts = this.bookings.filter((b) => {
+      if (b.table_id !== tableId) return false;
+      if (b.status === "cancelled" || b.status === "completed" || b.status === "no_show") return false;
+
+      const clean = b.during.replace(/[\[\]\(\)"]/g, "");
+      const [startStr, endStr] = clean.split(",");
+      if (!startStr || !endStr) return false;
+      const bStartMs = new Date(startStr).getTime();
+      const bEndMs = new Date(endStr).getTime();
+
+      return reqStartMs < bEndMs && reqEndMs > bStartMs;
+    });
+
+    return {
+      hasConflict: conflicts.length > 0,
+      conflictingBookings: conflicts,
+    };
+  }
+
+  scheduleMaintenance(record: Omit<MaintenanceRecord, "id" | "reported_at" | "status">): MaintenanceRecord {
+    const newRecord: MaintenanceRecord = {
+      ...record,
+      id: `maint-${Date.now()}`,
+      reported_at: new Date().toISOString(),
+      status: "open",
+    };
+
+    this.maintenanceRecords.unshift(newRecord);
+    const table = this.tables.find((t) => t.id === record.table_id);
+    if (table) {
+      table.status = "maintenance";
+    }
+
+    this.saveToStorage();
+    return newRecord;
+  }
+
+  resolveMaintenance(id: string, notes?: string): boolean {
+    const rec = this.maintenanceRecords.find((m) => m.id === id);
+    if (!rec) return false;
+    rec.status = "resolved";
+    rec.resolved_at = new Date().toISOString();
+    if (notes) rec.notes = notes;
+
+    const table = this.tables.find((t) => t.id === rec.table_id);
+    if (table && table.status === "maintenance") {
+      table.status = "free";
+    }
+
+    this.saveToStorage();
+    return true;
+  }
+
+  // --- TABLET OPERATING MODE ---
+  getIsTabletMode(): boolean {
+    return this.isTabletMode;
+  }
+
+  toggleTabletMode(): boolean {
+    this.isTabletMode = !this.isTabletMode;
+    this.saveToStorage();
+    return this.isTabletMode;
   }
 }
 

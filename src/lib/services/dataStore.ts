@@ -18,6 +18,13 @@ import {
   PoolClosure,
   TemporaryReservation,
   Customer,
+  WaitingListEntry,
+  ShiftHandover,
+  DailyClosing,
+  MembershipPlan,
+  CustomerMembership,
+  RewardLedgerEntry,
+  NotificationRecord,
 } from "@/types/database";
 import { hashPassword, hashPin } from "./crypto";
 
@@ -304,6 +311,13 @@ class BackendDataStore {
   poolClosures: PoolClosure[] = [];
   temporaryReservations: TemporaryReservation[] = [];
   customers: Customer[] = [];
+  waitingList: WaitingListEntry[] = [];
+  shiftHandovers: ShiftHandover[] = [];
+  dailyClosings: DailyClosing[] = [];
+  membershipPlans: MembershipPlan[] = [];
+  customerMemberships: CustomerMembership[] = [];
+  rewardLedger: RewardLedgerEntry[] = [];
+  notifications: NotificationRecord[] = [];
   settings: VenueSettings = { ...DEFAULT_SETTINGS };
 
   constructor() {
@@ -411,6 +425,49 @@ class BackendDataStore {
     if (!this.poolClosures) this.poolClosures = [];
     if (!this.temporaryReservations) this.temporaryReservations = [];
     if (!this.customers) this.customers = [];
+    if (!this.waitingList) this.waitingList = [];
+    if (!this.shiftHandovers) this.shiftHandovers = [];
+    if (!this.dailyClosings) this.dailyClosings = [];
+    if (!this.membershipPlans || this.membershipPlans.length === 0) {
+      this.membershipPlans = [
+        {
+          id: "plan-silver",
+          name: "Silver Cueist",
+          tier: "Silver",
+          fee: 1499,
+          duration_days: 30,
+          discount_percentage: 10,
+          points_multiplier: 1,
+          perks: ["10% off table time", "Priority booking window (3 days)", "1 Reward Point per ₹10 spent"],
+          active: true,
+        },
+        {
+          id: "plan-gold",
+          name: "Gold Champion",
+          tier: "Gold",
+          fee: 3499,
+          duration_days: 90,
+          discount_percentage: 15,
+          points_multiplier: 1.5,
+          perks: ["15% off table time & café", "Complimentary locker", "Priority booking window (7 days)", "1.5x Reward Points"],
+          active: true,
+        },
+        {
+          id: "plan-platinum",
+          name: "Platinum Master",
+          tier: "Platinum",
+          fee: 9999,
+          duration_days: 365,
+          discount_percentage: 20,
+          points_multiplier: 2,
+          perks: ["20% off all charges", "VIP lounge access", "Complimentary custom cue storage", "2x Reward Points"],
+          active: true,
+        },
+      ];
+    }
+    if (!this.customerMemberships) this.customerMemberships = [];
+    if (!this.rewardLedger) this.rewardLedger = [];
+    if (!this.notifications) this.notifications = [];
   }
 }
 
@@ -437,6 +494,27 @@ if (!backendDataStore.temporaryReservations) {
 }
 if (!backendDataStore.customers) {
   backendDataStore.customers = [];
+}
+if (!backendDataStore.waitingList) {
+  backendDataStore.waitingList = [];
+}
+if (!backendDataStore.shiftHandovers) {
+  backendDataStore.shiftHandovers = [];
+}
+if (!backendDataStore.dailyClosings) {
+  backendDataStore.dailyClosings = [];
+}
+if (!backendDataStore.membershipPlans) {
+  backendDataStore.membershipPlans = [];
+}
+if (!backendDataStore.customerMemberships) {
+  backendDataStore.customerMemberships = [];
+}
+if (!backendDataStore.rewardLedger) {
+  backendDataStore.rewardLedger = [];
+}
+if (!backendDataStore.notifications) {
+  backendDataStore.notifications = [];
 }
 if (!backendDataStore.tables || !backendDataStore.tables.some((t) => t.id === "main-pool")) {
   backendDataStore.tables = [...INITIAL_TABLES];

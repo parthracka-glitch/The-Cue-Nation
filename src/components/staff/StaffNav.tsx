@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
@@ -18,23 +18,43 @@ import {
   LogOut,
   ChevronRight,
   ShieldAlert,
+  ArrowRightLeft,
+  Tablet,
+  CalendarDays,
+  FileCheck2,
 } from "lucide-react";
 import clsx from "clsx";
+import { venueStore } from "@/lib/store/venueStore";
 
 export function StaffNav() {
   const pathname = usePathname();
   const router = useRouter();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isTabletMode, setIsTabletMode] = useState(false);
+
+  useEffect(() => {
+    setIsTabletMode(venueStore.getIsTabletMode());
+    const unsub = venueStore.subscribe(() => {
+      setIsTabletMode(venueStore.getIsTabletMode());
+    });
+    return unsub;
+  }, []);
+
+  const handleToggleTablet = () => {
+    const updated = venueStore.toggleTabletMode();
+    setIsTabletMode(updated);
+  };
 
   const links = [
     { href: "/staff/dashboard", label: "Floor Dashboard", icon: LayoutDashboard },
-    { href: "/staff/tables", label: "Tables & Arena", icon: Layers },
-    { href: "/staff/bookings", label: "Daily Bookings", icon: Calendar },
-    { href: "/staff/sessions", label: "Live Timers", icon: Clock },
+    { href: "/staff/timeline", label: "Table Timeline", icon: CalendarDays },
+    { href: "/staff/waiting-list", label: "Waiting List", icon: Users },
+    { href: "/staff/closing", label: "Daily Closing", icon: FileCheck2 },
+    { href: "/staff/handover", label: "Shift Handover", icon: ArrowRightLeft },
     { href: "/staff/billing", label: "Billing & POS", icon: CreditCard },
-    { href: "/staff/cafe", label: "Café Orders", icon: ChefHat },
     { href: "/staff/customers", label: "Customer Look-up", icon: Users },
-    { href: "/staff/history", label: "Shift History", icon: UserCheck },
+    { href: "/staff/sessions", label: "Live Timers", icon: Clock },
+    { href: "/staff/bookings", label: "Daily Bookings", icon: Calendar },
     { href: "/staff/maintenance", label: "Maintenance", icon: Wrench },
   ];
 
@@ -61,11 +81,11 @@ export function StaffNav() {
         <div className="flex items-center gap-2.5">
           <Link href="/staff/dashboard" className="flex items-center gap-2">
             <div className="w-7 h-7 rounded-lg bg-brass/20 border border-brass/40 flex items-center justify-center text-brass font-bold text-xs">
-              CN
+              QN
             </div>
             <div>
               <span className="text-xs font-bold text-cream tracking-wide block">
-                STAFF PORTAL
+                QNATION FLOOR OPS
               </span>
               <span className="text-[10px] text-brass/80 block sm:hidden font-medium">
                 {currentLink.label}
@@ -75,6 +95,23 @@ export function StaffNav() {
         </div>
 
         <div className="flex items-center gap-2">
+          {/* Tablet Mode Quick Toggle */}
+          <button
+            onClick={handleToggleTablet}
+            className={clsx(
+              "inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border text-xs font-semibold transition-all touch-manipulation min-h-[36px]",
+              isTabletMode
+                ? "bg-brass text-midnight border-brass font-bold shadow-sm"
+                : "bg-white/5 border-white/10 text-mist hover:text-cream"
+            )}
+            title="Toggle high-contrast simplified tablet kiosk mode"
+          >
+            <Tablet className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">
+              {isTabletMode ? "Tablet Kiosk Active" : "Tablet Mode"}
+            </span>
+          </button>
+
           {/* Mobile All-Tools Menu Button */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}

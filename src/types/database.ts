@@ -284,5 +284,112 @@ export interface VenueSettings {
   tax_percentage: number;
   pool_hourly_rate: number;
   snooker_hourly_rate: number;
+  membership_enabled?: boolean;
 }
+
+export interface WaitingListEntry {
+  id: string;
+  customer_name: string;
+  customer_phone: string;
+  discipline: "pool" | "snooker";
+  party_size: number;
+  preferred_duration: number; // minutes
+  created_at: string;
+  status: "waiting" | "notified" | "seated" | "cancelled" | "expired";
+  estimated_wait_minutes?: number;
+  allocated_table_id?: string;
+  notes?: string;
+}
+
+export interface ShiftHandover {
+  id: string;
+  shift_date: string;
+  outgoing_staff_id: string;
+  outgoing_staff_name: string;
+  incoming_staff_id?: string;
+  incoming_staff_name?: string;
+  cash_drawer_expected: number;
+  cash_drawer_actual: number;
+  cash_variance: number;
+  completed_sessions_count: number;
+  unpaid_bills_count: number;
+  operational_notes: string;
+  status: "submitted" | "acknowledged";
+  created_at: string;
+  acknowledged_at?: string;
+}
+
+export interface DailyClosing {
+  id: string;
+  closing_date: string;
+  closed_by_id: string;
+  closed_by_name: string;
+  total_sessions: number;
+  total_revenue: number;
+  cash_collected: number;
+  upi_collected: number;
+  card_collected: number;
+  online_collected: number;
+  refunds_total: number;
+  discounts_total: number;
+  outstanding_balance: number;
+  expected_cash: number;
+  actual_cash: number;
+  cash_variance: number;
+  closing_notes?: string;
+  status: "submitted" | "approved" | "discrepancy";
+  created_at: string;
+  approved_by?: string;
+  approved_at?: string;
+}
+
+export interface MembershipPlan {
+  id: string;
+  name: string;
+  tier: "Silver" | "Gold" | "Platinum";
+  fee: number;
+  duration_days: number;
+  discount_percentage: number;
+  points_multiplier: number;
+  perks: string[];
+  active: boolean;
+}
+
+export interface CustomerMembership {
+  id: string;
+  customer_phone: string;
+  customer_name: string;
+  plan_id: string;
+  plan_name: string;
+  tier: "Silver" | "Gold" | "Platinum";
+  start_date: string;
+  expiry_date: string;
+  points_balance: number;
+  active: boolean;
+  created_at: string;
+}
+
+export interface RewardLedgerEntry {
+  id: string;
+  customer_phone: string;
+  points: number;
+  type: "earned" | "redeemed" | "adjustment";
+  reference_id?: string;
+  note?: string;
+  created_at: string;
+}
+
+export interface NotificationRecord {
+  id: string;
+  recipient_phone: string;
+  recipient_name: string;
+  type: "booking_confirmation" | "reminder" | "bill_ready" | "waitlist_ready" | "promotional";
+  message: string;
+  status: "queued" | "sent" | "delivered" | "failed";
+  channel: "whatsapp" | "sms";
+  created_at: string;
+  sent_at?: string;
+  error_message?: string;
+}
+
 

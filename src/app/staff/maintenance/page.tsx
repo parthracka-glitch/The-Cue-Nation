@@ -52,6 +52,22 @@ export default function StaffMaintenancePage() {
     e.preventDefault();
     if (!selectedTableId || !issue.trim()) return;
 
+    if (markOffline) {
+      const nowISO = new Date().toISOString();
+      const endISO = new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString();
+      const conflict = venueStore.checkMaintenanceConflict(selectedTableId, nowISO, endISO);
+
+      if (conflict.hasConflict) {
+        const refs = conflict.conflictingBookings
+          .map((b) => `#${b.booking_code} (${b.guest_name || "Guest"})`)
+          .join(", ");
+        const proceed = window.confirm(
+          `MAINTENANCE CONFLICT DETECTED:\n\nConflicting reservations: ${refs}\n\nBlocking this table will affect these customers. Do you want to proceed and mark this table offline anyway?`
+        );
+        if (!proceed) return;
+      }
+    }
+
     try {
       const res = await fetch("/api/maintenance", {
         method: "POST",

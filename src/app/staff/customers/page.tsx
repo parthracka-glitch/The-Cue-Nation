@@ -145,12 +145,33 @@ export default function StaffCustomersPage() {
                         </td>
                         <td className="py-3.5 px-4">
                           {cust.latestBooking ? (
-                            <StatusBadge status={cust.latestBooking.status} isDark />
+                            <div className="flex flex-col gap-1">
+                              <StatusBadge status={cust.latestBooking.status} isDark />
+                              {(() => {
+                                const mem = venueStore.getCustomerMemberships().find(
+                                  (m) => m.customer_phone.replace(/\D/g, "") === cust.phone.replace(/\D/g, "") && m.active
+                                );
+                                if (!mem) return null;
+                                return (
+                                  <span className="inline-block px-1.5 py-0.5 rounded text-[10px] font-bold uppercase bg-amber-500/20 text-amber-300 border border-amber-500/30 w-fit">
+                                    ★ {mem.plan_name} ({mem.points_balance} pts)
+                                  </span>
+                                );
+                              })()}
+                            </div>
                           ) : (
                             "—"
                           )}
                         </td>
-                        <td className="py-3.5 px-4 text-right">
+                        <td className="py-3.5 px-4 text-right space-x-2">
+                          <Link
+                            href={`/staff?guestName=${encodeURIComponent(cust.name)}&guestPhone=${encodeURIComponent(cust.phone)}`}
+                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-brass/20 hover:bg-brass/30 text-brass border border-brass/40 text-[11px] font-bold transition"
+                            title="Quick repeat walk-in booking"
+                          >
+                            <Calendar className="w-3 h-3" />
+                            <span>Repeat</span>
+                          </Link>
                           {cust.latestBooking?.status === "confirmed" && (
                             <Link href="/staff/bookings">
                               <Button variant="primary-dark" size="sm" className="gap-1 text-xs font-bold">

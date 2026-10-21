@@ -18,7 +18,8 @@ import {
   LogOut,
   Menu,
   X,
-  Lock,
+  FileCheck2,
+  Crown,
 } from "lucide-react";
 import clsx from "clsx";
 
@@ -29,18 +30,18 @@ export function AdminNav() {
 
   const links = [
     { href: "/admin/dashboard", label: "Executive Dashboard", icon: LayoutDashboard },
+    { href: "/admin/closing", label: "Closing Approvals", icon: FileCheck2 },
+    { href: "/admin/memberships", label: "VIP Memberships", icon: Crown },
     { href: "/admin/bookings", label: "Bookings", icon: Calendar },
     { href: "/admin/sessions", label: "Live Sessions", icon: Layers },
     { href: "/admin/tables", label: "Tables & Arenas", icon: Layers },
-    { href: "/admin/cafe", label: "Café Menu", icon: BarChart3 },
-    { href: "/admin/inventory", label: "Inventory", icon: Wrench },
     { href: "/admin/staff", label: "Staff Accounts", icon: UserCog },
     { href: "/admin/customers", label: "Customers", icon: Users },
     { href: "/admin/pricing", label: "Pricing Rules", icon: Percent },
     { href: "/admin/payments", label: "Transactions", icon: CreditCard },
-    { href: "/admin/reports", label: "Reports & Export", icon: BarChart3 },
-    { href: "/admin/settings", label: "Settings", icon: Settings },
+    { href: "/admin/reports", label: "Reports & Forecast", icon: BarChart3 },
     { href: "/admin/audit-logs", label: "Audit Logs", icon: ShieldCheck },
+    { href: "/admin/settings", label: "Settings", icon: Settings },
   ];
 
   const currentLink = links.find(
@@ -74,7 +75,7 @@ export function AdminNav() {
             </div>
             <div>
               <span className="text-xs font-bold text-cream tracking-wide block">
-                ADMIN CONSOLE
+                QNATION ADMIN CONSOLE
               </span>
               <span className="text-[10px] text-bronze-glow block sm:hidden font-medium">
                 {currentLink.label}
