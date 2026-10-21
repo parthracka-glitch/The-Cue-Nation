@@ -71,12 +71,13 @@ export default function AdminSessionsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-midnight text-cream py-6 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto space-y-6">
-        <AdminNav />
+    <div className="min-h-screen bg-midnight text-cream flex flex-col">
+      <AdminNav />
 
-        {/* Top Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-midnight-line">
+      <main className="flex-1 py-8 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto space-y-6">
+          {/* Top Header */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-midnight-line">
           <div>
             <span className="text-[10px] uppercase font-bold tracking-widest text-bronze">
               Administrative Command
@@ -197,7 +198,8 @@ export default function AdminSessionsPage() {
           bill={selectedBill}
           onPaymentSettled={reloadData}
         />
-      </div>
+        </div>
+      </main>
     </div>
   );
 }

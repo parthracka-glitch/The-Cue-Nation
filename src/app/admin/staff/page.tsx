@@ -174,7 +174,7 @@ export default function AdminStaffPage() {
           {/* Staff Accounts Table */}
           <div className="bg-midnight-card border border-midnight-line rounded-2xl overflow-hidden shadow-lg">
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs">
+              <table className="w-full text-left text-xs min-w-[750px]">
                 <thead className="bg-midnight/70 text-mist uppercase font-mono tracking-wider border-b border-midnight-line">
                   <tr>
                     <th className="py-3.5 px-4">Staff ID</th>
@@ -187,11 +187,36 @@ export default function AdminStaffPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-midnight-line text-cream">
-                  {staffList.map((st) => (
-                    <tr key={st.id} className="hover:bg-white/5 transition-colors">
-                      <td className="py-3.5 px-4 font-mono font-bold text-bronze-glow">
-                        {st.staff_id}
+                  {staffList.length === 0 ? (
+                    <tr>
+                      <td colSpan={7} className="text-center py-14 px-4 text-mist">
+                        <div className="max-w-xs mx-auto space-y-3">
+                          <div className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center mx-auto text-mist">
+                            <UserCog className="w-5 h-5 text-bronze-glow" />
+                          </div>
+                          <div>
+                            <div className="font-semibold text-cream text-sm">No Staff Accounts</div>
+                            <p className="text-xs text-mist mt-0.5">
+                              No operational staff accounts configured yet.
+                            </p>
+                          </div>
+                          <Button
+                            variant="primary-dark"
+                            size="sm"
+                            onClick={() => setCreateModal(true)}
+                            className="bg-bronze hover:bg-bronze-glow text-midnight font-bold gap-1 text-xs"
+                          >
+                            <Plus className="w-3.5 h-3.5" /> Provision First Account
+                          </Button>
+                        </div>
                       </td>
+                    </tr>
+                  ) : (
+                    staffList.map((st) => (
+                      <tr key={st.id} className="hover:bg-white/5 transition-colors">
+                        <td className="py-3.5 px-4 font-mono font-bold text-bronze-glow">
+                          {st.staff_id}
+                        </td>
                       <td className="py-3.5 px-4 font-bold text-cream">
                         {st.name}
                       </td>
@@ -242,7 +267,7 @@ export default function AdminStaffPage() {
                         </Button>
                       </td>
                     </tr>
-                  ))}
+                  )))}
                 </tbody>
               </table>
             </div>

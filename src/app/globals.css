@@ -197,3 +197,32 @@ a, button, input, select, textarea, [role="button"] {
   }
 }
 
+/* Universal accessible keyboard focus ring */
+:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+/* Accessible focus ring suppression for mouse clicks */
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* Table horizontal scroll container styling */
+.table-responsive-container {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Smooth motion respecting user preference */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+

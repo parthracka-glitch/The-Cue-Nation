@@ -466,7 +466,7 @@ function BookingContent() {
                       type="button"
                       disabled={!isAvailable}
                       onClick={() => handleSlotSelect(slot)}
-                      className={`p-3.5 rounded-2xl border text-left transition-all relative flex flex-col justify-between ${
+                      className={`p-3.5 rounded-2xl border text-left transition-all relative flex flex-col justify-between min-h-[84px] touch-manipulation ${
                         !isAvailable
                           ? "bg-black/5 border-black/5 opacity-40 cursor-not-allowed"
                           : isSelected

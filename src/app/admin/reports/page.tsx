@@ -240,8 +240,8 @@ export default function AdminReportsPage() {
               </div>
             </div>
 
-            <div className="h-72 w-full pt-4">
-              <ResponsiveContainer width="100%" height="100%">
+            <div className="h-72 min-h-[288px] w-full pt-4">
+              <ResponsiveContainer width="100%" height="100%" minHeight={280}>
                 <BarChart data={hourlyDemand} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#1E2B29" vertical={false} />
                   <XAxis dataKey="hour" stroke="#6D5330" tick={{ fill: "#EDDFC2", fontSize: 11 }} />
@@ -313,8 +313,8 @@ export default function AdminReportsPage() {
               Revenue Stream Breakdown
             </h3>
 
-            <div className="h-72 w-full pt-4">
-              <ResponsiveContainer width="100%" height="100%">
+            <div className="h-72 min-h-[288px] w-full pt-4">
+              <ResponsiveContainer width="100%" height="100%" minHeight={280}>
                 <BarChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#1E2B29" vertical={false} />
                   <XAxis dataKey="category" stroke="#6D5330" tick={{ fill: "#EDDFC2", fontSize: 12 }} />

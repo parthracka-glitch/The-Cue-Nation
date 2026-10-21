@@ -112,6 +112,9 @@ const config: Config = {
         hero: "linear-gradient(180deg, #063B38 0%, #010101 100%)",
         scrim: "linear-gradient(to top, rgba(1,1,1,.85), rgba(1,1,1,0))",
       },
+      gridTemplateColumns: {
+        "16": "repeat(16, minmax(0, 1fr))",
+      },
     },
   },
   plugins: [],

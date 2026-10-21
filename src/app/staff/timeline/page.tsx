@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 
 export default function TableTimelinePage() {
+  const scrollContainerRef = React.useRef<HTMLDivElement>(null);
   const [selectedDate, setSelectedDate] = useState(() => new Date().toISOString().split("T")[0]!);
   const [disciplineFilter, setDisciplineFilter] = useState<"all" | "pool" | "snooker">("all");
   const [tables, setTables] = useState<GameTable[]>([]);
@@ -35,6 +36,12 @@ export default function TableTimelinePage() {
     timeRange: string;
     details?: Record<string, any>;
   } | null>(null);
+
+  const scrollTimeline = (delta: number) => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollBy({ left: delta, behavior: "smooth" });
+    }
+  };
 
   const reload = () => {
     setTables(venueStore.getTables());
@@ -171,15 +178,39 @@ export default function TableTimelinePage() {
                 Maintenance
               </span>
             </div>
+
+            {/* Quick Horizontal Scroll Navigators */}
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => scrollTimeline(-280)}
+                className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl border border-midnight-line text-xs font-semibold text-mist hover:text-cream bg-midnight hover:bg-white/5 transition-colors"
+                title="Scroll earlier hours"
+              >
+                <ChevronLeft className="w-3.5 h-3.5" />
+                <span>Earlier</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => scrollTimeline(280)}
+                className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl border border-midnight-line text-xs font-semibold text-mist hover:text-cream bg-midnight hover:bg-white/5 transition-colors"
+                title="Scroll later hours"
+              >
+                <span>Later</span>
+                <ChevronRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
           </div>
 
           {/* Timeline Grid */}
           <div className="bg-midnight-card rounded-2xl border border-midnight-line overflow-hidden shadow-card">
-            <div className="overflow-x-auto">
-              <div className="min-w-[900px] p-5">
+            <div ref={scrollContainerRef} className="overflow-x-auto">
+              <div className="min-w-[1050px] p-5">
                 {/* Time Axis Header */}
                 <div className="grid grid-cols-16 border-b border-midnight-line pb-2.5 text-[11px] font-mono font-bold text-mist text-center">
-                  <div className="text-left font-sans uppercase tracking-wider text-[10px]">Table</div>
+                  <div className="sticky left-0 bg-midnight-card text-left font-sans uppercase tracking-wider text-[10px] z-10 pr-2">
+                    Table
+                  </div>
                   {hours.map((h) => {
                     const label = h === 0 ? "12 AM" : h < 12 ? `${h} AM` : h === 12 ? "12 PM" : `${h - 12} PM`;
                     return (
@@ -210,7 +241,7 @@ export default function TableTimelinePage() {
                     return (
                       <div key={table.id} className="grid grid-cols-16 items-center py-3.5 group hover:bg-midnight/30 transition-colors">
                         {/* Table Header Cell */}
-                        <div className="pr-3">
+                        <div className="sticky left-0 bg-midnight-card z-10 pr-3">
                           <div className="font-display text-sm font-bold text-cream">
                             {table.name}
                           </div>

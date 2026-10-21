@@ -54,7 +54,7 @@ export function BilliardsHero() {
           {/* Action Buttons */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 pt-3 sm:pt-4">
             <Link
-              href="/booking"
+              href="/book"
               className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl bg-gradient-to-r from-brass to-brass-dark hover:from-brass-glow hover:to-brass text-ink font-semibold text-base transition-all duration-200 shadow-lg hover:shadow-brass/20 hover:-translate-y-0.5 touch-manipulation min-h-[48px]"
             >
               <Sparkles className="w-5 h-5" />

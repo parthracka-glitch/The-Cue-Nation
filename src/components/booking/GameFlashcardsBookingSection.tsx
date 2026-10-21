@@ -545,7 +545,7 @@ export function GameFlashcardsBookingSection() {
                         type="button"
                         disabled={!isAvailable}
                         onClick={() => setSelectedSlot(slot)}
-                        className={`p-3 rounded-xl border text-left transition-all relative flex flex-col justify-between ${
+                        className={`p-3 rounded-xl border text-left transition-all relative flex flex-col justify-between min-h-[78px] touch-manipulation ${
                           !isAvailable
                             ? "bg-midnight-card/40 border-midnight-line/40 opacity-40 cursor-not-allowed"
                             : isSelected
