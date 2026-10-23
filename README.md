@@ -133,7 +133,8 @@ The application will be available at [http://localhost:3000](http://localhost:30
   ```
 - **Automated End-to-End Workflow & Negative Tests**:
   ```bash
-  node test_e2e_complete_flow.js
+  npm run test:e2e
+  # or: node test_e2e_complete_flow.js
   ```
 
 ### 5. Production Build
@@ -141,7 +142,7 @@ The application will be available at [http://localhost:3000](http://localhost:30
 npm run build
 npm run start
 ```
-All 65 routes compile statically and dynamically with strict type checking and zero warnings.
+All 71 routes compile statically and dynamically with strict type checking and zero warnings.
 
 ---
 

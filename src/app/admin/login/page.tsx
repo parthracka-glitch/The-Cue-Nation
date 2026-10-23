@@ -27,10 +27,24 @@ export default function AdminLoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleAdminLogin = async (e: React.FormEvent) => {
+  const handleAdminLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError(null);
     setIsLoading(true);
+
+    const form = e.currentTarget;
+    const formElements = form.elements as typeof form.elements & {
+      email?: HTMLInputElement;
+      password?: HTMLInputElement;
+    };
+    const targetEmail = (email || formElements.email?.value || "").trim();
+    const targetPassword = password || formElements.password?.value || "";
+
+    if (!targetEmail || !targetPassword) {
+      setError("Please enter both email and password");
+      setIsLoading(false);
+      return;
+    }
 
     try {
       const res = await fetch("/api/auth/login", {
@@ -38,8 +52,8 @@ export default function AdminLoginPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           type: "admin",
-          email,
-          password,
+          email: targetEmail,
+          password: targetPassword,
         }),
       });
 
@@ -53,9 +67,11 @@ export default function AdminLoginPage() {
       if (typeof window !== "undefined") {
         localStorage.setItem("cn_admin_token", data.token);
         localStorage.setItem("cn_admin_user", JSON.stringify(data.user));
+        document.cookie = `cn_admin_token=${data.token}; path=/; max-age=604800; SameSite=Lax`;
+        document.cookie = `cue_user_role=owner; path=/; max-age=604800; SameSite=Lax`;
       }
       switchRole("owner");
-      router.push("/admin/dashboard");
+      window.location.href = "/admin/dashboard";
     } catch {
       setError("Network or server connection error");
       setIsLoading(false);
@@ -110,6 +126,8 @@ export default function AdminLoginPage() {
               <div className="relative">
                 <input
                   type="email"
+                  name="email"
+                  autoComplete="email"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -127,6 +145,8 @@ export default function AdminLoginPage() {
               <div className="relative">
                 <input
                   type={showPassword ? "text" : "password"}
+                  name="password"
+                  autoComplete="current-password"
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}

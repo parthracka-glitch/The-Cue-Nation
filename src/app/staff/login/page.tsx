@@ -28,10 +28,24 @@ export default function StaffLoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError(null);
     setIsLoading(true);
+
+    const form = e.currentTarget;
+    const formElements = form.elements as typeof form.elements & {
+      identifier?: HTMLInputElement;
+      password?: HTMLInputElement;
+    };
+    const targetIdentifier = (identifier || formElements.identifier?.value || "").trim();
+    const targetPassword = password || formElements.password?.value || "";
+
+    if (!targetIdentifier || !targetPassword) {
+      setError("Please enter both staff ID and password");
+      setIsLoading(false);
+      return;
+    }
 
     try {
       const res = await fetch("/api/auth/login", {
@@ -39,8 +53,8 @@ export default function StaffLoginPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           type: "staff",
-          identifier,
-          password,
+          identifier: targetIdentifier,
+          password: targetPassword,
         }),
       });
 
@@ -55,9 +69,11 @@ export default function StaffLoginPage() {
       if (typeof window !== "undefined") {
         localStorage.setItem("cn_staff_token", data.token);
         localStorage.setItem("cn_staff_user", JSON.stringify(data.user));
+        document.cookie = `cn_staff_token=${data.token}; path=/; max-age=604800; SameSite=Lax`;
+        document.cookie = `cue_user_role=${data.user?.role || "staff"}; path=/; max-age=604800; SameSite=Lax`;
       }
       switchRole("staff");
-      router.push("/staff/dashboard");
+      window.location.href = "/staff/dashboard";
     } catch {
       setError("Network or server connection error");
       setIsLoading(false);

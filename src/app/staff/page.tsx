@@ -381,8 +381,8 @@ export default function StaffFloorPage() {
       <StaffNav />
       <div className="flex-1 py-8 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto space-y-8">
-        {/* Floor Control Bar */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-midnight-line">
+        {/* Floor Control Bar & Left Shortcut Buttons */}
+        <div className="flex flex-col gap-4 pb-6 border-b border-midnight-line">
           <div>
             <div className="flex items-center gap-2">
               <span className="w-2.5 h-2.5 rounded-full bg-baize-light animate-ping" />
@@ -395,35 +395,46 @@ export default function StaffFloorPage() {
             </h1>
           </div>
 
-          <div className="flex flex-wrap items-center gap-3">
-            <Link href="/staff/kitchen">
-              <Button variant="secondary-dark" size="sm" className="gap-2">
-                <ChefHat className="w-4 h-4 text-bronze-glow" />
-                Kitchen Display System
-              </Button>
-            </Link>
-            <Link href="/staff/billing">
-              <Button variant="secondary-dark" size="sm" className="gap-2">
-                <Receipt className="w-4 h-4 text-bronze-glow" />
-                Combined POS Bills
-              </Button>
-            </Link>
+          {/* Left Shortcut Actions Strip */}
+          <div className="flex flex-wrap items-center gap-2 pt-1">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-mist/70 mr-1 flex items-center gap-1">
+              <Zap className="w-3 h-3 text-bronze-glow" /> Shortcuts:
+            </span>
             <Button
               variant="primary-dark"
               size="sm"
               onClick={() => handleOpenWalkIn("pool", null)}
-              className="gap-2 bg-baize hover:bg-baize-light text-cream font-bold shadow-sm"
+              className="gap-2 bg-baize hover:bg-baize-light text-cream font-bold shadow-sm h-8 px-3 rounded-lg text-xs"
             >
-              <UserPlus className="w-4 h-4 text-cream" />
-              Walk-in Booking
+              <UserPlus className="w-3.5 h-3.5 text-cream" />
+              New Walk-in
             </Button>
+            <Link href="/staff/kitchen">
+              <Button variant="secondary-dark" size="sm" className="gap-2 h-8 px-3 rounded-lg text-xs border-white/10 hover:border-bronze-glow/50 bg-midnight-card text-cream">
+                <ChefHat className="w-3.5 h-3.5 text-bronze-glow" />
+                Kitchen (KDS)
+              </Button>
+            </Link>
+            <Link href="/staff/billing">
+              <Button variant="secondary-dark" size="sm" className="gap-2 h-8 px-3 rounded-lg text-xs border-white/10 hover:border-bronze-glow/50 bg-midnight-card text-cream">
+                <Receipt className="w-3.5 h-3.5 text-bronze-glow" />
+                POS Billing
+              </Button>
+            </Link>
+            <Link href="/staff/timeline">
+              <Button variant="ghost" size="sm" className="gap-2 h-8 px-3 rounded-lg text-xs border border-white/10 text-mist hover:text-cream hover:bg-white/5">
+                <Clock className="w-3.5 h-3.5 text-bronze-glow" />
+                Daily Timeline
+              </Button>
+            </Link>
             <Button
               variant="ghost"
               size="sm"
               onClick={reloadData}
-              className="text-mist hover:text-cream border border-midnight-line"
+              className="text-mist hover:text-cream border border-white/10 h-8 px-2.5 rounded-lg text-xs hover:bg-white/5"
+              title="Refresh Floor Data"
             >
-              <RefreshCw className="w-4 h-4" />
+              <RefreshCw className="w-3.5 h-3.5" />
             </Button>
           </div>
         </div>

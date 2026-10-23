@@ -212,7 +212,7 @@ async function runE2ETests() {
     assert(!!finalBill, 'Authoritative final bill generated');
     assert(finalBill.food_charge === 600, 'Bill includes served café food: ₹600');
     assert(finalBill.time_charge >= 525, `Bill includes pool & extension charges: ₹${finalBill.time_charge}`);
-    assert(finalBill.total === finalBill.time_charge + finalBill.food_charge, `Bill total reconciles: ₹${finalBill.total}`);
+    assert(finalBill.total === finalBill.time_charge + finalBill.food_charge + (finalBill.tax_amount || 0), `Bill total reconciles: ₹${finalBill.total}`);
     assert(finalBill.paid === false, 'Initial bill payment status is unpaid');
 
     // Table should now be released back to free

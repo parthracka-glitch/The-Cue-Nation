@@ -147,6 +147,79 @@ body {
   animation: lampPulse 10s ease-in-out infinite;
 }
 
+/* Live Video Background Animations */
+@keyframes heroVideoDrift {
+  0% {
+    transform: scale(1.05) translate3d(0, 0, 0);
+  }
+  25% {
+    transform: scale(1.10) translate3d(-1.5%, -0.8%, 0);
+  }
+  50% {
+    transform: scale(1.14) translate3d(-0.5%, -1.4%, 0);
+  }
+  75% {
+    transform: scale(1.09) translate3d(1.2%, -0.6%, 0);
+  }
+  100% {
+    transform: scale(1.05) translate3d(0, 0, 0);
+  }
+}
+
+.animate-hero-video-drift {
+  animation: heroVideoDrift 28s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+  will-change: transform;
+}
+
+@keyframes neonSignPulse {
+  0%, 100% {
+    opacity: 0.55;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.85;
+    transform: scale(1.06);
+  }
+}
+
+.animate-neon-sign-pulse {
+  animation: neonSignPulse 4.5s ease-in-out infinite;
+}
+
+@keyframes overheadLampShimmer {
+  0%, 100% {
+    opacity: 0.50;
+    transform: scale(1);
+  }
+  35% {
+    opacity: 0.75;
+    transform: scale(1.04);
+  }
+  70% {
+    opacity: 0.60;
+    transform: scale(0.98);
+  }
+}
+
+.animate-overhead-lamp-shimmer {
+  animation: overheadLampShimmer 6s ease-in-out infinite;
+}
+
+@keyframes feltShimmer {
+  0%, 100% {
+    opacity: 0.35;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.60;
+    transform: scale(1.05);
+  }
+}
+
+.animate-felt-shimmer {
+  animation: feltShimmer 7s ease-in-out infinite;
+}
+
 /* Touch manipulation optimization - eliminate 300ms tap delay on mobile */
 a, button, input, select, textarea, [role="button"] {
   touch-action: manipulation;
