@@ -1,0 +1,77 @@
+/* ==========================================================================
+   CUENATION — Animation Utilities & Keyframes
+   Subtle, cinematic, and understated motion design
+   ========================================================================== */
+
+/* Fade-in reveal states for GSAP and CSS fallback */
+.reveal-fade-up {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity, transform;
+}
+
+.reveal-fade-up.is-revealed {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Subtle ambient pulse for luxury status indicators */
+@keyframes ambientGlow {
+  0%, 100% {
+    opacity: 0.6;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.08);
+  }
+}
+
+.badge-dot {
+  animation: ambientGlow 3s ease-in-out infinite;
+}
+
+/* Gentle floating highlight */
+@keyframes subtleFloat {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+.floating-element {
+  animation: subtleFloat 6s ease-in-out infinite;
+}
+
+/* Three.js canvas subtle fade-in */
+#hero-canvas {
+  opacity: 0;
+  transition: opacity 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+#hero-canvas.is-ready {
+  opacity: 1;
+}
+
+/* Reduced motion preference compliance */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  
+  .reveal-fade-up {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  
+  .badge-dot,
+  .floating-element {
+    animation: none !important;
+  }
+}

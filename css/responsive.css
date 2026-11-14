@@ -1,0 +1,833 @@
+/* ==========================================================================
+   CUENATION — Responsive Rules
+   Breakpoints: 1200px, 992px, 768px, 480px
+   ========================================================================== */
+
+/* Laptops & Desktops (< 1200px) */
+@media (max-width: 1200px) {
+  :root {
+    --container-pad: 2rem;
+  }
+
+  .nav-center {
+    gap: 1.5rem;
+  }
+
+  .hero-main-heading {
+    font-size: clamp(3rem, 5.5vw, 4.5rem);
+  }
+
+  .hero-canvas-col {
+    height: 500px;
+  }
+
+  .games-layout {
+    grid-template-columns: 320px 1fr;
+    gap: 2.5rem;
+  }
+
+  .game-card {
+    height: 360px;
+  }
+
+  .cafe-split-layout {
+    grid-template-columns: 52% 48%;
+    gap: 3rem;
+  }
+
+  .cafe-image-frame {
+    height: 460px;
+  }
+
+  .gallery-item {
+    flex: 0 0 390px;
+  }
+
+  .gallery-image-wrapper {
+    height: 340px;
+  }
+
+  .features-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Tablets (< 992px) */
+@media (max-width: 992px) {
+  :root {
+    --header-height: 76px;
+    --space-24: 4.5rem;
+  }
+
+  /* Hide desktop center nav, show mobile hamburger */
+  .nav-center {
+    display: none;
+  }
+
+  .nav-toggle {
+    display: inline-flex;
+  }
+
+  /* Mobile Drawer Menu */
+  .mobile-drawer {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 100%;
+    max-width: 360px;
+    height: 100vh;
+    height: 100dvh;
+    background-color: var(--bg-secondary);
+    border-left: 1px solid var(--border-subtle);
+    padding: 5.5rem 2rem 2.5rem;
+    z-index: 1100;
+    transform: translateX(100%);
+    transition: transform var(--transition-smooth);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    box-shadow: -20px 0 50px rgba(0, 0, 0, 0.8);
+    overflow-y: auto;
+  }
+
+  .mobile-drawer.is-open {
+    transform: translateX(0);
+  }
+
+  .drawer-close-btn {
+    position: absolute;
+    top: 1.5rem;
+    right: 1.5rem;
+    color: var(--text-muted);
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-sm);
+    transition: color var(--transition-fast);
+  }
+
+  .drawer-close-btn:hover {
+    color: var(--accent-champagne);
+  }
+
+  .mobile-nav-links {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+
+  .mobile-nav-link {
+    font-family: var(--font-serif);
+    font-size: 1.4rem;
+    color: var(--text-primary);
+    transition: color var(--transition-fast), transform var(--transition-fast);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  .mobile-nav-link:hover,
+  .mobile-nav-link.is-active {
+    color: var(--accent-champagne);
+    transform: translateX(4px);
+  }
+
+  .drawer-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    z-index: 1050;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--transition-fast);
+  }
+
+  .drawer-backdrop.is-active {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  /* Hero Section Stacking on Tablets */
+  .hero-grid {
+    grid-template-columns: 1fr;
+    text-align: left;
+    padding-top: 2rem;
+    min-height: auto;
+    gap: 3rem;
+  }
+
+  .hero-text-col {
+    max-width: 100%;
+    order: 1;
+  }
+
+  .hero-canvas-col {
+    order: 2;
+    height: 420px;
+    width: 100%;
+  }
+
+  .ball-drop-shadow {
+    bottom: 8%;
+    width: 220px;
+    height: 32px;
+  }
+
+  /* Games Layout on Tablets */
+  .games-layout {
+    grid-template-columns: 1fr;
+    gap: 2.25rem;
+  }
+
+  .games-header-col {
+    max-width: 550px;
+  }
+
+  .game-card {
+    height: 340px;
+  }
+
+  /* Café Split Layout on Tablets */
+  .cafe-split-layout {
+    grid-template-columns: 1fr;
+    gap: 3.5rem;
+  }
+
+  .cafe-image-frame {
+    height: 420px;
+  }
+
+  .cafe-content-col {
+    padding-left: 0;
+  }
+
+  .cafe-abstract-artwork {
+    width: 340px;
+    height: 340px;
+    right: -4%;
+  }
+
+  /* Why Section on Tablets */
+  .why-features-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 3rem 1.5rem;
+  }
+
+  .why-divider {
+    display: none;
+  }
+
+  /* Gallery on Tablets */
+  .gallery-top-bar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1.5rem;
+  }
+
+  .gallery-header-right {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .gallery-item {
+    flex: 0 0 350px;
+  }
+
+  .gallery-image-wrapper {
+    height: 310px;
+  }
+
+  /* Lightbox on Tablets */
+  .lightbox-prev {
+    left: -2rem;
+  }
+
+  .lightbox-next {
+    right: -2rem;
+  }
+
+  /* Testimonials on Tablets */
+  .testimonials-carousel-wrapper {
+    gap: 1.25rem;
+  }
+
+  .testimonial-card-panel {
+    padding: 3rem 2.25rem 2.25rem;
+  }
+
+  .testimonial-arrow-btn {
+    width: 46px;
+    height: 46px;
+  }
+
+  .features-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* CTA Banner on Tablets */
+  .cta-banner {
+    padding: 3.5rem 2.5rem;
+  }
+
+  .cta-content {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2.25rem;
+    padding-right: 140px;
+  }
+
+  .cta-ball-wrapper {
+    width: 280px;
+    height: 280px;
+    right: -55px;
+    opacity: 0.85;
+  }
+
+  /* Footer on Tablets */
+  .footer-main-bar {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 2rem;
+  }
+
+  .footer-nav-links {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1.75rem;
+  }
+
+  .footer-socials {
+    justify-content: center;
+  }
+}
+
+/* Mobile Devices (< 768px) */
+@media (max-width: 768px) {
+  :root {
+    --container-pad: 1.25rem;
+    --header-height: 72px;
+  }
+
+  .header-right .btn-pill-champagne {
+    display: none; /* Accessible in the mobile drawer */
+  }
+
+  .hero-section {
+    padding-top: calc(var(--header-height) + 1.5rem);
+    padding-bottom: 5rem;
+  }
+
+  .hero-main-heading {
+    font-size: 2.75rem;
+    line-height: 1.1;
+  }
+
+  .hero-lead-desc {
+    font-size: 1rem;
+    line-height: 1.6;
+    margin-bottom: 1.75rem;
+  }
+
+  .hero-cta-group {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+    gap: 0.85rem;
+  }
+
+  .hero-cta-group .btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* 3D Ball Canvas on Mobile: positioned cleanly below text with proper spacing */
+  .hero-canvas-col {
+    height: 340px;
+  }
+
+  .three-status-badge {
+    bottom: 2%;
+    right: 50%;
+    transform: translateX(50%);
+  }
+
+  .hero-scroll-indicator {
+    bottom: 1.25rem;
+  }
+
+  /* Games Cards stacked on mobile */
+  .games-section {
+    padding-top: var(--space-16);
+    padding-bottom: var(--space-16);
+  }
+
+  .games-heading {
+    font-size: 2.25rem;
+  }
+
+  .games-cards-group {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .game-card {
+    height: 310px;
+  }
+
+  .game-card-content {
+    padding: 1.25rem 1.35rem;
+  }
+
+  .game-card-title {
+    font-size: 1.35rem;
+  }
+
+  /* Café Section on Mobile */
+  .cafe-section {
+    padding-top: var(--space-16);
+    padding-bottom: var(--space-16);
+  }
+
+  .cafe-image-frame {
+    height: 320px;
+    border-radius: 16px;
+  }
+
+  .cafe-heading {
+    font-size: 2.35rem;
+  }
+
+  .cafe-desc {
+    font-size: 1rem;
+  }
+
+  .cafe-cta-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* Why Section on Mobile */
+  .why-section {
+    padding-top: var(--space-16);
+    padding-bottom: var(--space-16);
+  }
+
+  .why-heading {
+    font-size: 2.25rem;
+  }
+
+  /* Gallery Section on Mobile */
+  .gallery-section {
+    padding-top: var(--space-16);
+    padding-bottom: var(--space-16);
+  }
+
+  .gallery-heading {
+    font-size: 2.25rem;
+  }
+
+  .gallery-item {
+    flex: 0 0 290px;
+    border-radius: 16px;
+  }
+
+  .gallery-image-wrapper {
+    height: 260px;
+  }
+
+  .gallery-item-overlay {
+    opacity: 1;
+    background: linear-gradient(180deg, transparent 65%, rgba(9, 11, 9, 0.8) 100%);
+  }
+
+  /* Lightbox on Mobile */
+  .lightbox-dialog {
+    width: 95%;
+  }
+
+  .lightbox-img {
+    max-height: 56vh;
+  }
+
+  .lightbox-footer {
+    padding-top: 1rem;
+  }
+
+  .lightbox-caption {
+    font-size: 1.1rem;
+  }
+
+  .lightbox-btn {
+    width: 44px;
+    height: 44px;
+  }
+
+  .lightbox-close {
+    top: -3.25rem;
+    right: 0;
+  }
+
+  .lightbox-prev {
+    left: 0.5rem;
+    top: auto;
+    bottom: -3.8rem;
+    transform: none;
+  }
+
+  .lightbox-next {
+    right: 0.5rem;
+    top: auto;
+    bottom: -3.8rem;
+    transform: none;
+  }
+
+  .lightbox-prev:hover,
+  .lightbox-next:hover {
+    transform: scale(1.05);
+  }
+
+  /* Testimonials on Mobile */
+  .testimonials-section {
+    padding-top: var(--space-16);
+    padding-bottom: var(--space-16);
+  }
+
+  .testimonials-heading {
+    font-size: 2.25rem;
+  }
+
+  .testimonials-carousel-wrapper {
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .testimonial-card-panel {
+    padding: 2.5rem 1.5rem 2rem;
+    border-radius: 16px;
+  }
+
+  .testimonial-quote {
+    font-size: 1.15rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .testimonial-arrow-btn {
+    display: none;
+  }
+
+  /* CTA Banner on Mobile */
+  .cta-banner {
+    padding: 2.75rem 1.75rem;
+    border-radius: 18px;
+  }
+
+  .cta-content {
+    padding-right: 0;
+  }
+
+  .cta-ball-wrapper {
+    width: 220px;
+    height: 220px;
+    right: -40px;
+    bottom: -35px;
+    top: auto;
+    transform: none;
+    opacity: 0.35;
+  }
+
+  .cta-heading {
+    font-size: 2.25rem;
+  }
+
+  .cta-description {
+    font-size: 0.98rem;
+  }
+
+  .cta-book-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* Footer on Mobile */
+  .footer-nav-links {
+    gap: 1.25rem;
+    font-size: 0.9rem;
+  }
+
+  .footer-socials {
+    gap: 1.25rem;
+  }
+
+  /* Booking Modal on Mobile */
+  .booking-modal-overlay {
+    padding: 1rem;
+  }
+
+  .booking-modal-body {
+    padding: 2.25rem 1.5rem 1.75rem;
+  }
+
+  .form-row-2 {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .game-selector-grid {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  .success-actions {
+    flex-direction: column;
+  }
+}
+
+/* Standard Mobile Phones (< 480px / 390px) */
+@media (max-width: 480px) {
+  :root {
+    --container-pad: 1rem;
+    --header-height: 68px;
+  }
+
+  .hero-main-heading {
+    font-size: 2.35rem;
+    line-height: 1.1;
+  }
+
+  .hero-label-badge {
+    font-size: 0.72rem;
+    letter-spacing: 0.2em;
+  }
+
+  .hero-canvas-col {
+    height: 290px;
+  }
+
+  .ball-drop-shadow {
+    width: 180px;
+    height: 24px;
+  }
+
+  .game-card {
+    height: 280px;
+  }
+
+  .game-card-btn {
+    width: 42px;
+    height: 42px;
+  }
+
+  .game-card-icon {
+    width: 38px;
+    height: 38px;
+  }
+
+  .cafe-image-frame {
+    height: 260px;
+  }
+
+  .cafe-heading {
+    font-size: 2.05rem;
+  }
+
+  .why-features-grid {
+    grid-template-columns: 1fr;
+    gap: 2.25rem;
+  }
+
+  .why-heading {
+    font-size: 2rem;
+  }
+
+  .gallery-item {
+    flex: 0 0 270px;
+  }
+
+  .gallery-image-wrapper {
+    height: 230px;
+  }
+
+  .testimonials-heading {
+    font-size: 2rem;
+  }
+
+  .testimonial-card-panel {
+    padding: 2.25rem 1.25rem 1.75rem;
+  }
+
+  .testimonial-quote {
+    font-size: 1.05rem;
+  }
+
+  .cta-banner {
+    padding: 2.25rem 1.25rem;
+  }
+
+  .cta-heading {
+    font-size: 1.95rem;
+  }
+
+  .footer-nav-links {
+    gap: 1rem;
+    font-size: 0.85rem;
+  }
+
+  /* Booking Modal on Phones */
+  .booking-modal-overlay {
+    padding: 0.5rem;
+  }
+
+  .booking-modal-dialog {
+    border-radius: 16px;
+    max-height: 94dvh;
+  }
+
+  .booking-modal-body {
+    padding: 2rem 1.15rem 1.5rem;
+  }
+
+  .booking-modal-close {
+    top: 1rem;
+    right: 1rem;
+    width: 34px;
+    height: 34px;
+  }
+
+  .booking-modal-title {
+    font-size: 1.65rem;
+  }
+
+  .booking-submit-btn {
+    padding: 1rem;
+    font-size: 0.95rem;
+  }
+
+  .summary-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.2rem;
+  }
+
+  .summary-val {
+    text-align: left;
+  }
+}
+
+/* Extra Small Phones (<= 360px) */
+@media (max-width: 360px) {
+  :root {
+    --container-pad: 0.75rem;
+  }
+
+  .hero-main-heading {
+    font-size: 2.05rem;
+  }
+
+  .hero-lead-desc {
+    font-size: 0.92rem;
+  }
+
+  .hero-cta-group {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .hero-cta-group .btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .hero-canvas-col {
+    height: 250px;
+  }
+
+  .game-card {
+    height: 250px;
+  }
+
+  .cafe-heading {
+    font-size: 1.75rem;
+  }
+
+  .why-heading {
+    font-size: 1.75rem;
+  }
+
+  .testimonials-heading {
+    font-size: 1.75rem;
+  }
+
+  .cta-heading {
+    font-size: 1.7rem;
+  }
+
+  .booking-modal-body {
+    padding: 1.75rem 0.85rem 1.25rem;
+  }
+
+  .booking-modal-title {
+    font-size: 1.45rem;
+  }
+
+  .form-input {
+    height: 46px;
+    font-size: 0.88rem;
+  }
+}
+
+/* Laptops & Standard Desktops (>= 1024px) */
+@media (min-width: 1024px) {
+  .hero-grid {
+    grid-template-columns: 55% 45%;
+  }
+}
+
+/* Wide Desktops (>= 1440px) */
+@media (min-width: 1440px) {
+  :root {
+    --container-max: 1360px;
+  }
+
+  .hero-canvas-col {
+    height: 620px;
+  }
+
+  .game-card {
+    height: 420px;
+  }
+
+  .cafe-image-frame {
+    height: 520px;
+  }
+
+  .gallery-image-wrapper {
+    height: 380px;
+  }
+}
+
+/* Ultra-Wide Displays (>= 1920px) */
+@media (min-width: 1920px) {
+  :root {
+    --container-max: 1480px;
+  }
+
+  .hero-main-heading {
+    font-size: 4.8rem;
+  }
+
+  .hero-canvas-col {
+    height: 660px;
+  }
+
+  .cta-banner {
+    padding: 5rem 6rem;
+  }
+}

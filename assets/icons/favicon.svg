@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <radialGradient id="bgGrad" cx="35%" cy="30%" r="70%">
+      <stop offset="0%" stop-color="#19241b"/>
+      <stop offset="50%" stop-color="#0f1611"/>
+      <stop offset="100%" stop-color="#070907"/>
+    </radialGradient>
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fdf4e7"/>
+      <stop offset="50%" stop-color="#E8BD91"/>
+      <stop offset="100%" stop-color="#c99b6b"/>
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="1.5" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+  </defs>
+
+  <!-- Dark Billiards Luxury Squircle -->
+  <rect x="2" y="2" width="60" height="60" rx="16" fill="url(#bgGrad)" stroke="#1a4c36" stroke-width="2"/>
+  
+  <!-- Subtle Champagne Inner Border -->
+  <rect x="4" y="4" width="56" height="56" rx="14" fill="none" stroke="#E8BD91" stroke-width="0.8" stroke-opacity="0.35"/>
+
+  <!-- CN Luxury Monogram -->
+  <g filter="url(#glow)">
+    <!-- C Letter -->
+    <path d="M25 20C17 20 12 25 12 32C12 39 17 44 25 44C29 44 32 42.5 33.5 40.5" 
+          fill="none" 
+          stroke="url(#goldGrad)" 
+          stroke-width="3.8" 
+          stroke-linecap="round"/>
+    <!-- N Letter -->
+    <path d="M36 44V20L49 44V20" 
+          fill="none" 
+          stroke="url(#goldGrad)" 
+          stroke-width="3.8" 
+          stroke-linecap="round" 
+          stroke-linejoin="round"/>
+    <!-- Central Accent Dot -->
+    <circle cx="25" cy="32" r="2.2" fill="#E8BD91"/>
+  </g>
+</svg>

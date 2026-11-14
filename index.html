@@ -1,0 +1,1067 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CueNation — Premium Billiards, Snooker Lounge &amp; Artisanal Caf&eacute;</title>
+  <meta name="description"
+    content="Your perfect hangout spot for billiards, great food and good vibes. Championship tournament pool &amp; snooker tables, artisanal gourmet dining, crafted espresso, and a luxury social lounge.">
+  <meta name="keywords"
+    content="CueNation, billiards lounge, snooker club, tournament pool tables, artisanal cafe, luxury sports bar, snooker reservation">
+  <meta name="author" content="CueNation">
+  <meta name="theme-color" content="#090B09">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="assets/icons/favicon.svg">
+  <link rel="alternate icon" type="image/png" href="assets/icons/favicon.svg">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://cuenation.com/">
+  <meta property="og:title" content="CueNation — Premium Billiards, Snooker Lounge &amp; Artisanal Caf&eacute;">
+  <meta property="og:description"
+    content="Your perfect hangout spot for billiards, great food and good vibes. Championship tournament tables, artisanal dining, and ambient lounge.">
+  <meta property="og:image" content="assets/images/hero-billiards-lounge.jpg">
+  <meta property="og:site_name" content="CueNation">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="CueNation — Premium Billiards, Snooker Lounge &amp; Artisanal Caf&eacute;">
+  <meta name="twitter:description" content="Your perfect hangout spot for billiards, great food and good vibes.">
+  <meta name="twitter:image" content="assets/images/hero-billiards-lounge.jpg">
+
+  <!-- Google Fonts: Playfair Display & Manrope with font-display swap -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&display=swap"
+    rel="stylesheet">
+
+  <!-- Core CSS Modules -->
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/animations.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+
+<body>
+
+  <!-- =========================================================================
+       1. Navigation Header (Transparent Over Hero / Sticky On Scroll)
+       ========================================================================= -->
+  <header class="site-header" id="site-header">
+    <div class="container header-container">
+
+      <!-- Left: CueNation Brand Mark & CN Monogram -->
+      <a href="#hero" class="brand-mark" aria-label="CueNation Homepage">
+        <div class="brand-monogram" aria-hidden="true">
+          <svg width="24" height="24" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <!-- Refined CN Monogram Vector -->
+            <path d="M12.5 10C8.5 10 6 12.8 6 16C6 19.2 8.5 22 12.5 22C14.8 22 16.2 21.2 17 20.2" stroke="#E8BD91"
+              stroke-width="2.2" stroke-linecap="round" />
+            <path d="M18.5 22V10L26 22V10" stroke="#E8BD91" stroke-width="2.2" stroke-linecap="round"
+              stroke-linejoin="round" />
+            <circle cx="12.5" cy="16" r="1.5" fill="#E8BD91" />
+          </svg>
+        </div>
+        <span class="brand-name">CueNation</span>
+      </a>
+
+      <!-- Center: Main Navigation Links -->
+      <nav class="nav-center" aria-label="Primary Navigation">
+        <a href="#hero" class="nav-link is-active">Home</a>
+        <a href="#games" class="nav-link">Games</a>
+        <a href="#cafe" class="nav-link">Café</a>
+        <a href="#about" class="nav-link">About</a>
+        <a href="#gallery" class="nav-link">Gallery</a>
+        <a href="#contact" class="nav-link">Contact</a>
+      </nav>
+
+      <!-- Right: Action CTA & Mobile Toggle -->
+      <div class="header-right">
+        <a href="#contact" class="btn btn-pill-champagne" data-open-booking>
+          <span>Book a Table</span>
+          <span class="btn-arrow" aria-hidden="true">&rarr;</span>
+        </a>
+
+        <!-- Mobile Hamburger Toggle -->
+        <button class="nav-toggle" aria-label="Open navigation menu">
+          <i data-lucide="menu" style="width: 24px; height: 24px;"></i>
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- Mobile Drawer Menu -->
+  <div class="mobile-drawer" id="mobile-drawer" aria-hidden="true">
+    <button class="drawer-close-btn" aria-label="Close navigation menu">
+      <i data-lucide="x" style="width: 24px; height: 24px;"></i>
+    </button>
+
+    <div>
+      <div class="brand-mark" style="margin-bottom: 2.5rem;">
+        <div class="brand-monogram">
+          <span class="monogram-text">CN</span>
+        </div>
+        <span class="brand-name">CueNation</span>
+      </div>
+
+      <nav class="mobile-nav-links" aria-label="Mobile Navigation">
+        <a href="#hero" class="mobile-nav-link is-active">
+          <span>Home</span>
+          <span style="font-size: 0.9rem; opacity: 0.5;">01</span>
+        </a>
+        <a href="#games" class="mobile-nav-link">
+          <span>Games</span>
+          <span style="font-size: 0.9rem; opacity: 0.5;">02</span>
+        </a>
+        <a href="#cafe" class="mobile-nav-link">
+          <span>Café</span>
+          <span style="font-size: 0.9rem; opacity: 0.5;">03</span>
+        </a>
+        <a href="#about" class="mobile-nav-link">
+          <span>About</span>
+          <span style="font-size: 0.9rem; opacity: 0.5;">04</span>
+        </a>
+        <a href="#gallery" class="mobile-nav-link">
+          <span>Gallery</span>
+          <span style="font-size: 0.9rem; opacity: 0.5;">05</span>
+        </a>
+        <a href="#contact" class="mobile-nav-link">
+          <span>Contact</span>
+          <span style="font-size: 0.9rem; opacity: 0.5;">06</span>
+        </a>
+      </nav>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 1rem; margin-top: 2rem;">
+      <a href="#contact" class="btn btn-pill-champagne" style="width: 100%; justify-content: center;" data-open-booking>
+        <span>Book a Table</span>
+        <span class="btn-arrow">&rarr;</span>
+      </a>
+      <p class="text-subtle" style="font-size: 0.75rem; text-align: center;">
+        Open Daily: 11:00 AM — Midnight
+      </p>
+    </div>
+  </div>
+  <div class="drawer-backdrop" id="drawer-backdrop"></div>
+
+  <!-- =========================================================================
+       2. Cinematic Hero Section
+       ========================================================================= -->
+  <main>
+    <section class="hero-section" id="hero">
+
+      <!-- Realistic Bililards Lounge Background with Depth of Field -->
+      <div class="hero-bg-container">
+        <img src="assets/images/hero-billiards-lounge.jpg"
+          alt="Billiards lounge ambient background with green pool table felt and warm glowing pendant lights"
+          class="hero-bg-image" width="1920" height="1080" fetchpriority="high" decoding="async">
+      </div>
+
+      <!-- Atmospheric Dark Vignettes & Warm Amber Gradients -->
+      <div class="hero-vignette"></div>
+
+      <!-- Main Hero Content Container -->
+      <div class="container" style="position: relative; z-index: 5;">
+        <div class="hero-grid">
+
+          <!-- Left Column: Typography & CTAs -->
+          <div class="hero-text-col">
+
+            <!-- Label -->
+            <div class="hero-label-badge">
+              <span>POOL</span>
+              <span class="dot-sep">&middot;</span>
+              <span>SNOOKER</span>
+              <span class="dot-sep">&middot;</span>
+              <span>CAF&Eacute;</span>
+            </div>
+
+            <!-- Main Heading with Serif Italic Repeat. -->
+            <h1 class="hero-main-heading">
+              Play. Eat.<br>
+              <span class="hero-italic">Repeat.</span>
+            </h1>
+
+            <!-- Descriptive Subtext -->
+            <p class="hero-lead-desc">
+              Your perfect hangout spot for<br>
+              billiards, great food and good vibes.
+            </p>
+
+            <!-- Action Buttons -->
+            <div class="hero-cta-group">
+              <a href="#contact" class="btn btn-pill-champagne" data-open-booking>
+                <span>Book Your Table</span>
+                <span class="btn-arrow" aria-hidden="true">&rarr;</span>
+              </a>
+              <a href="#cafe" class="btn btn-pill-outline">
+                <span>Explore Our Caf&eacute;</span>
+              </a>
+            </div>
+
+          </div>
+
+          <!-- Right Column: Interactive 3D Realistic Billiard 8-Ball -->
+          <div class="hero-canvas-col">
+            <div class="three-canvas-container">
+
+              <!-- Three.js Interactive Canvas -->
+              <canvas id="hero-canvas" aria-label="Interactive 3D Billiard Eight Ball"></canvas>
+
+              <!-- Contact Drop Shadow with natural blur and depth -->
+              <div class="ball-drop-shadow" aria-hidden="true"></div>
+
+              <!-- Interactive Hint Indicator -->
+              <div class="three-status-badge" aria-hidden="true">
+                <span class="indicator-pulse"></span>
+                <span>Interactive 3D &bull; Drag to Rotate</span>
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Bottom Scroll Indicator -->
+      <a href="#games" class="hero-scroll-indicator" aria-label="Scroll down to explore">
+        <span class="scroll-text">Scroll</span>
+        <div class="scroll-mouse" aria-hidden="true">
+          <div class="scroll-wheel"></div>
+        </div>
+      </a>
+
+    </section>
+
+    <!-- =========================================================================
+         3. Pool & Snooker Section
+         ========================================================================= -->
+    <section class="games-section" id="games">
+      <div class="container">
+        <div class="games-layout">
+
+          <!-- Left Content -->
+          <div class="games-header-col">
+            <span class="games-label">OUR GAMES</span>
+            <h2 class="games-heading">Pool &amp; Snooker</h2>
+            <p class="games-desc">
+              Two classic games. One amazing experience.
+            </p>
+          </div>
+
+          <!-- Right Content: Two Large Horizontal Photographic Cards -->
+          <div class="games-cards-group">
+
+            <!-- CARD 1: Pool Tables -->
+            <article class="game-card" data-card="pool">
+              <div class="game-card-media">
+                <img src="assets/images/pool-table-balls.jpg" alt="Professional pool table with colorful billiard balls"
+                  class="game-card-img" width="600" height="400" loading="lazy" decoding="async">
+                <div class="game-card-overlay"></div>
+              </div>
+
+              <div class="game-card-content">
+                <div class="game-card-info">
+                  <div class="game-card-icon" aria-hidden="true">
+                    <i data-lucide="circle-dot"></i>
+                  </div>
+                  <h3 class="game-card-title">Pool Tables.</h3>
+                </div>
+
+                <a href="#contact" class="game-card-btn" aria-label="Book Pool Table" data-open-booking
+                  data-game="Pool">
+                  <i data-lucide="arrow-up-right"></i>
+                </a>
+              </div>
+            </article>
+
+            <!-- CARD 2: Snooker Tables -->
+            <article class="game-card" data-card="snooker">
+              <div class="game-card-media">
+                <img src="assets/images/snooker-table-reds.jpg" alt="Professional snooker table with red balls"
+                  class="game-card-img" width="600" height="400" loading="lazy" decoding="async">
+                <div class="game-card-overlay"></div>
+              </div>
+
+              <div class="game-card-content">
+                <div class="game-card-info">
+                  <div class="game-card-icon" aria-hidden="true">
+                    <i data-lucide="triangle"></i>
+                  </div>
+                  <h3 class="game-card-title">Snooker Tables.</h3>
+                </div>
+
+                <a href="#contact" class="game-card-btn" aria-label="Book Snooker Table" data-open-booking
+                  data-game="Snooker">
+                  <i data-lucide="arrow-up-right"></i>
+                </a>
+              </div>
+            </article>
+
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- =========================================================================
+         4. Café Section (Two-Column Split Layout)
+         ========================================================================= -->
+    <section class="cafe-section" id="cafe">
+      <div class="container">
+        <div class="cafe-split-layout">
+
+          <!-- LEFT: Large Photographic Image (~55%) -->
+          <div class="cafe-media-col">
+            <div class="cafe-image-frame">
+              <img src="assets/images/cafe-dining.jpg"
+                alt="Gourmet artisan burger, crispy golden french fries and chocolate milkshake on a wooden café table under warm lighting"
+                class="cafe-hero-img" width="800" height="600" loading="lazy" decoding="async">
+              <div class="cafe-image-vignette"></div>
+            </div>
+          </div>
+
+          <!-- RIGHT: Content & Decorative Abstract Circular Artwork (~45%) -->
+          <div class="cafe-content-col">
+
+            <!-- Decorative Abstract Circular Line Artwork -->
+            <div class="cafe-abstract-artwork" aria-hidden="true">
+              <svg width="420" height="420" viewBox="0 0 420 420" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="210" cy="210" r="200" stroke="#E8BD91" stroke-width="1" stroke-dasharray="4 6"
+                  opacity="0.22" />
+                <circle cx="210" cy="210" r="160" stroke="#E8BD91" stroke-width="1.2" opacity="0.16" />
+                <circle cx="210" cy="210" r="120" stroke="#E8BD91" stroke-width="0.8" stroke-dasharray="3 5"
+                  opacity="0.2" />
+                <circle cx="210" cy="210" r="80" stroke="#E8BD91" stroke-width="1.4" opacity="0.14" />
+                <circle cx="210" cy="210" r="40" stroke="#E8BD91" stroke-width="0.7" opacity="0.28" />
+                <circle cx="210" cy="50" r="4" fill="#E8BD91" opacity="0.4" />
+                <circle cx="370" cy="210" r="3" fill="#E8BD91" opacity="0.3" />
+                <circle cx="100" cy="300" r="2.5" fill="#E8BD91" opacity="0.35" />
+              </svg>
+            </div>
+
+            <!-- Content Group -->
+            <div class="cafe-text-wrapper">
+              <span class="cafe-label">OUR CAF&Eacute;</span>
+
+              <h2 class="cafe-heading">
+                Great Food.<br>
+                <span class="cafe-heading-light">Better Games.</span>
+              </h2>
+
+              <p class="cafe-desc">
+                Enjoy delicious snacks, refreshing drinks and more while you play.
+              </p>
+
+              <div class="cafe-cta-wrapper">
+                <a href="#contact" class="btn btn-pill-champagne cafe-cta-btn">
+                  <span>View Menu</span>
+                  <span class="btn-arrow" aria-hidden="true">&rarr;</span>
+                </a>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- =========================================================================
+         5. Why CueNation Section (About)
+         ========================================================================= -->
+    <section class="why-section" id="about">
+      <div class="container">
+
+        <!-- Centered Heading -->
+        <div class="why-header">
+          <span class="why-label">WHY CUE NATION?</span>
+          <h2 class="why-heading">More Than Just a Game.</h2>
+        </div>
+
+        <!-- Four Equally Spaced Feature Columns with Thin Vertical Dividers -->
+        <div class="why-features-grid">
+
+          <!-- FEATURE 1: Trophy / Premium Tables -->
+          <div class="why-feature-col">
+            <div class="why-icon-wrap" aria-label="Premium Tables Icon">
+              <i data-lucide="trophy"></i>
+            </div>
+            <h3 class="why-feature-title">Premium Tables</h3>
+          </div>
+
+          <div class="why-divider" aria-hidden="true"></div>
+
+          <!-- FEATURE 2: Coffee / In-House Café -->
+          <div class="why-feature-col">
+            <div class="why-icon-wrap" aria-label="In-House Café Icon">
+              <i data-lucide="coffee"></i>
+            </div>
+            <h3 class="why-feature-title">In-House Caf&eacute;</h3>
+          </div>
+
+          <div class="why-divider" aria-hidden="true"></div>
+
+          <!-- FEATURE 3: Users / Social Vibes -->
+          <div class="why-feature-col">
+            <div class="why-icon-wrap" aria-label="Social Vibes Icon">
+              <i data-lucide="users"></i>
+            </div>
+            <h3 class="why-feature-title">Social Vibes</h3>
+          </div>
+
+          <div class="why-divider" aria-hidden="true"></div>
+
+          <!-- FEATURE 4: Map Pin / Prime Location -->
+          <div class="why-feature-col">
+            <div class="why-icon-wrap" aria-label="Prime Location Icon">
+              <i data-lucide="map-pin"></i>
+            </div>
+            <h3 class="why-feature-title">Prime Location</h3>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+    <!-- =========================================================================
+         6. CueNation Gallery Section (Horizontal Scrolling & Full-Screen Lightbox)
+         ========================================================================= -->
+    <section class="gallery-section" id="gallery">
+      <div class="container gallery-top-bar">
+
+        <!-- Left: Small Label & Heading -->
+        <div class="gallery-header-left">
+          <span class="gallery-label">OUR SPACE</span>
+          <h2 class="gallery-heading">A Glimpse of CueNation</h2>
+        </div>
+
+        <!-- Right: Action Link & Prev/Next Navigation Controls -->
+        <div class="gallery-header-right">
+          <a href="#contact" class="gallery-action-link">
+            <span>View Gallery</span>
+            <span class="btn-arrow" aria-hidden="true">&rarr;</span>
+          </a>
+
+          <div class="gallery-nav-controls" aria-label="Gallery Controls">
+            <button class="gallery-nav-btn prev" aria-label="Scroll to previous image" id="gallery-prev">
+              <i data-lucide="chevron-left"></i>
+            </button>
+            <button class="gallery-nav-btn next" aria-label="Scroll to next image" id="gallery-next">
+              <i data-lucide="chevron-right"></i>
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Horizontal Scrolling Gallery Track -->
+      <div class="gallery-track-outer">
+        <div class="gallery-track" id="gallery-track" role="region" aria-label="CueNation Photo Gallery">
+
+          <!-- IMAGE 1: Pool Table Area -->
+          <div class="gallery-item" data-index="0" data-caption="Pool Table Area" role="button" tabindex="0"
+            aria-label="Enlarge Pool Table Area photo">
+            <div class="gallery-image-wrapper">
+              <img src="assets/images/gallery-1-pool.jpg"
+                alt="Championship Pool Table Area under warm focused canopy lights" class="gallery-img" width="600"
+                height="400" loading="lazy" decoding="async">
+              <div class="gallery-item-overlay">
+                <span class="gallery-expand-pill">
+                  <i data-lucide="maximize-2"></i>
+                  <span>Expand</span>
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- IMAGE 2: Café Seating -->
+          <div class="gallery-item" data-index="1" data-caption="Café Seating" role="button" tabindex="0"
+            aria-label="Enlarge Café Seating photo">
+            <div class="gallery-image-wrapper">
+              <img src="assets/images/gallery-2-cafe.jpg" alt="Contemporary Café Seating with artisanal espresso bar"
+                class="gallery-img" width="600" height="400" loading="lazy" decoding="async">
+              <div class="gallery-item-overlay">
+                <span class="gallery-expand-pill">
+                  <i data-lucide="maximize-2"></i>
+                  <span>Expand</span>
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- IMAGE 3: Lounge Interior -->
+          <div class="gallery-item" data-index="2" data-caption="Lounge Interior" role="button" tabindex="0"
+            aria-label="Enlarge Lounge Interior photo">
+            <div class="gallery-image-wrapper">
+              <img src="assets/images/gallery-3-lounge.jpg"
+                alt="Luxury Billiards Lounge Interior with plush leather club seating" class="gallery-img" width="600"
+                height="400" loading="lazy" decoding="async">
+              <div class="gallery-item-overlay">
+                <span class="gallery-expand-pill">
+                  <i data-lucide="maximize-2"></i>
+                  <span>Expand</span>
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- IMAGE 4: Snooker Table -->
+          <div class="gallery-item" data-index="3" data-caption="Snooker Table" role="button" tabindex="0"
+            aria-label="Enlarge Snooker Table photo">
+            <div class="gallery-image-wrapper">
+              <img src="assets/images/gallery-4-snooker.jpg"
+                alt="Professional Riley Aristocrat 12ft Snooker Table with competition cloth" class="gallery-img"
+                width="600" height="400" loading="lazy" decoding="async">
+              <div class="gallery-item-overlay">
+                <span class="gallery-expand-pill">
+                  <i data-lucide="maximize-2"></i>
+                  <span>Expand</span>
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- IMAGE 5: Restaurant Seating -->
+          <div class="gallery-item" data-index="4" data-caption="Restaurant Seating" role="button" tabindex="0"
+            aria-label="Enlarge Restaurant Seating photo">
+            <div class="gallery-image-wrapper">
+              <img src="assets/images/gallery-5-restaurant.jpg"
+                alt="Atmospheric Restaurant Seating with handcrafted tables and ambient lighting" class="gallery-img"
+                width="600" height="400" loading="lazy" decoding="async">
+              <div class="gallery-item-overlay">
+                <span class="gallery-expand-pill">
+                  <i data-lucide="maximize-2"></i>
+                  <span>Expand</span>
+                </span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </section>
+
+    <!-- =========================================================================
+         Full-Screen Lightbox Modal
+         ========================================================================= -->
+    <div class="gallery-lightbox" id="gallery-lightbox" aria-hidden="true" role="dialog"
+      aria-label="Full-screen photo viewer">
+      <div class="lightbox-backdrop" id="lightbox-backdrop"></div>
+
+      <div class="lightbox-dialog">
+        <!-- Close Button -->
+        <button class="lightbox-btn lightbox-close" id="lightbox-close" aria-label="Close full-screen image">
+          <i data-lucide="x"></i>
+        </button>
+
+        <!-- Navigation Controls -->
+        <button class="lightbox-btn lightbox-prev" id="lightbox-prev" aria-label="Previous image">
+          <i data-lucide="chevron-left"></i>
+        </button>
+        <button class="lightbox-btn lightbox-next" id="lightbox-next" aria-label="Next image">
+          <i data-lucide="chevron-right"></i>
+        </button>
+
+        <!-- Image & Caption Container -->
+        <div class="lightbox-content">
+          <img src="assets/images/gallery-1-pool.jpg" alt="Full-screen photo view" class="lightbox-img" id="lightbox-img" width="1200" height="800">
+          <div class="lightbox-footer">
+            <span class="lightbox-caption" id="lightbox-caption"></span>
+            <span class="lightbox-counter" id="lightbox-counter">01 / 05</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- =========================================================================
+         7. Testimonials Section (Premium Minimal Carousel)
+         ========================================================================= -->
+    <section class="testimonials-section" id="testimonials">
+      <div class="container">
+
+        <!-- Centered Header -->
+        <div class="testimonials-header">
+          <span class="testimonials-label">WHAT OUR CUSTOMERS SAY</span>
+          <h2 class="testimonials-heading">Real People. Real Experiences.</h2>
+        </div>
+
+        <!-- Carousel Wrapper with Prev / Next Navigation Controls -->
+        <div class="testimonials-carousel-wrapper">
+
+          <!-- Previous Button -->
+          <button class="testimonial-arrow-btn prev" id="testimonial-prev" aria-label="Previous testimonial">
+            <i data-lucide="chevron-left"></i>
+          </button>
+
+          <!-- Dark Transparent Review Panel -->
+          <div class="testimonial-card-panel" id="testimonial-panel" aria-live="polite">
+
+            <!-- Watermark Quote Vector -->
+            <div class="testimonial-quote-watermark" aria-hidden="true">
+              <svg width="60" height="60" viewBox="0 0 24 24" fill="currentColor">
+                <path
+                  d="M4.583 17.321C3.553 16.227 3 15 3 13.011c0-3.5 2.457-6.637 6.03-8.188l.893 1.378c-3.335 1.804-3.987 4.145-4.247 5.621.537-.278 1.24-.375 1.929-.311 1.804.167 3.226 1.648 3.226 3.489a3.5 3.5 0 01-3.5 3.5c-1.073 0-2.099-.49-2.748-1.179zm10 0C13.553 16.227 13 15 13 13.011c0-3.5 2.457-6.637 6.03-8.188l.893 1.378c-3.335 1.804-3.987 4.145-4.247 5.621.537-.278 1.24-.375 1.929-.311 1.804.167 3.226 1.648 3.226 3.489a3.5 3.5 0 01-3.5 3.5c-1.073 0-2.099-.49-2.748-1.179z" />
+              </svg>
+            </div>
+
+            <!-- Slides Track -->
+            <div class="testimonial-slides-track" id="testimonial-track">
+
+              <!-- SLIDE 1: Rohan Mehta -->
+              <article class="testimonial-slide is-active" data-index="0">
+                <!-- Five-star rating -->
+                <div class="testimonial-stars" aria-label="5 out of 5 stars">
+                  <i data-lucide="star" class="star-filled"></i>
+                  <i data-lucide="star" class="star-filled"></i>
+                  <i data-lucide="star" class="star-filled"></i>
+                  <i data-lucide="star" class="star-filled"></i>
+                  <i data-lucide="star" class="star-filled"></i>
+                </div>
+
+                <blockquote class="testimonial-quote">
+                  &ldquo;Amazing place! Great tables, delicious food and such a chill vibe. Definitely coming
+                  back!&rdquo;
+                </blockquote>
+
+                <div class="testimonial-author">
+                  <div class="author-avatar" aria-hidden="true">
+                    <span>RM</span>
+                  </div>
+                  <div class="author-meta">
+                    <h3 class="author-name">Rohan Mehta</h3>
+                    <span class="author-role">Verified Guest</span>
+                  </div>
+                </div>
+              </article>
+
+              <!-- SLIDE 2: Aarav Shah -->
+              <article class="testimonial-slide" data-index="1">
+                <!-- Five-star rating -->
+                <div class="testimonial-stars" aria-label="5 out of 5 stars">
+                  <i data-lucide="star" class="star-filled"></i>
+                  <i data-lucide="star" class="star-filled"></i>
+                  <i data-lucide="star" class="star-filled"></i>
+                  <i data-lucide="star" class="star-filled"></i>
+                  <i data-lucide="star" class="star-filled"></i>
+                </div>
+
+                <blockquote class="testimonial-quote">
+                  &ldquo;One of the best places to spend an evening with friends. Great atmosphere!&rdquo;
+                </blockquote>
+
+                <div class="testimonial-author">
+                  <div class="author-avatar" aria-hidden="true">
+                    <span>AS</span>
+                  </div>
+                  <div class="author-meta">
+                    <h3 class="author-name">Aarav Shah</h3>
+                    <span class="author-role">Regular Patron</span>
+                  </div>
+                </div>
+              </article>
+
+              <!-- SLIDE 3: Kunal Patel -->
+              <article class="testimonial-slide" data-index="2">
+                <!-- Five-star rating -->
+                <div class="testimonial-stars" aria-label="5 out of 5 stars">
+                  <i data-lucide="star" class="star-filled"></i>
+                  <i data-lucide="star" class="star-filled"></i>
+                  <i data-lucide="star" class="star-filled"></i>
+                  <i data-lucide="star" class="star-filled"></i>
+                  <i data-lucide="star" class="star-filled"></i>
+                </div>
+
+                <blockquote class="testimonial-quote">
+                  &ldquo;Beautiful ambience, well-maintained tables and delicious food.&rdquo;
+                </blockquote>
+
+                <div class="testimonial-author">
+                  <div class="author-avatar" aria-hidden="true">
+                    <span>KP</span>
+                  </div>
+                  <div class="author-meta">
+                    <h3 class="author-name">Kunal Patel</h3>
+                    <span class="author-role">Snooker Member</span>
+                  </div>
+                </div>
+              </article>
+
+            </div>
+
+            <!-- Slide Pagination Dots -->
+            <div class="testimonial-dots" role="tablist" aria-label="Testimonial slides pagination">
+              <button class="testimonial-dot is-active" role="tab" aria-selected="true" aria-label="Slide 1"
+                data-slide="0"></button>
+              <button class="testimonial-dot" role="tab" aria-selected="false" aria-label="Slide 2"
+                data-slide="1"></button>
+              <button class="testimonial-dot" role="tab" aria-selected="false" aria-label="Slide 3"
+                data-slide="2"></button>
+            </div>
+
+          </div>
+
+          <!-- Next Button -->
+          <button class="testimonial-arrow-btn next" id="testimonial-next" aria-label="Next testimonial">
+            <i data-lucide="chevron-right"></i>
+          </button>
+
+        </div>
+
+      </div>
+    </section>
+
+    <!-- =========================================================================
+         8. Final CTA Section (Wide Dark-Green Banner with 3D 8-Ball)
+         ========================================================================= -->
+    <section class="cta-section" id="contact">
+      <div class="container">
+        <div class="cta-banner">
+          <!-- Atmospheric Ambient Lighting Glow & Subtle Billiard Felt Grid -->
+          <div class="cta-lighting-glow" aria-hidden="true"></div>
+          <div class="cta-felt-pattern" aria-hidden="true"></div>
+
+          <!-- Content Grid: Left Text & Right Action -->
+          <div class="cta-content">
+            <div class="cta-text-side">
+              <span class="cta-pill-label">EXPERIENCE CUENATION</span>
+              <h2 class="cta-heading">Ready to Play?</h2>
+              <p class="cta-description">
+                Book your table now and enjoy the ultimate games + caf&eacute; experience.
+              </p>
+            </div>
+
+            <div class="cta-action-side">
+              <a href="#contact" class="btn btn-pill-champagne cta-book-btn" id="cta-book-btn" data-open-booking>
+                <span>Book Now</span>
+                <span class="btn-arrow">&rarr;</span>
+              </a>
+            </div>
+          </div>
+
+          <!-- Partially Visible Glossy Black 3D Billiard 8-Ball on Right Edge -->
+          <div class="cta-ball-wrapper" aria-hidden="true">
+            <canvas id="cta-ball-canvas" width="420" height="420" aria-label="3D Billiard Eight Ball"></canvas>
+            <div class="cta-ball-shadow"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- =========================================================================
+       9. Minimal Website Footer
+       ========================================================================= -->
+  <footer class="site-footer" id="footer">
+    <div class="container">
+      <div class="footer-main-bar">
+
+        <!-- Left: CueNation Logo & Brand Name -->
+        <a href="#hero" class="footer-brand" aria-label="CueNation Home">
+          <div class="brand-monogram">
+            <span class="monogram-text">CN</span>
+          </div>
+          <span class="brand-name">CueNation</span>
+        </a>
+
+        <!-- Center: Navigation Links -->
+        <nav class="footer-nav" aria-label="Footer Navigation">
+          <ul class="footer-nav-links">
+            <li><a href="#hero" class="footer-link">Home</a></li>
+            <li><a href="#games" class="footer-link">Games</a></li>
+            <li><a href="#cafe" class="footer-link">Caf&eacute;</a></li>
+            <li><a href="#about" class="footer-link">About</a></li>
+            <li><a href="#contact" class="footer-link">Contact</a></li>
+          </ul>
+        </nav>
+
+        <!-- Right: Social Channels -->
+        <div class="footer-socials" aria-label="Social Channels">
+          <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" class="footer-social-link"
+            aria-label="Instagram">
+            <i data-lucide="instagram"></i>
+            <span>Instagram</span>
+          </a>
+          <a href="https://youtube.com" target="_blank" rel="noopener noreferrer" class="footer-social-link"
+            aria-label="YouTube">
+            <i data-lucide="youtube"></i>
+            <span>YouTube</span>
+          </a>
+          <a href="https://x.com" target="_blank" rel="noopener noreferrer" class="footer-social-link" aria-label="X">
+            <svg class="x-social-icon" width="15" height="15" viewBox="0 0 24 24" fill="currentColor"
+              aria-hidden="true">
+              <path
+                d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+            </svg>
+            <span>X</span>
+          </a>
+        </div>
+
+      </div>
+
+      <!-- Bottom: Copyright Bar -->
+      <div class="footer-bottom-bar">
+        <p class="copyright-text">&copy; 2026 CueNation. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- =========================================================================
+       10. Customer-Facing Booking Modal Interface
+       ========================================================================= -->
+  <div class="booking-modal-overlay" id="booking-modal" aria-hidden="true" role="dialog" aria-modal="true"
+    aria-labelledby="booking-modal-title">
+    <div class="booking-modal-backdrop" id="booking-modal-backdrop"></div>
+
+    <div class="booking-modal-dialog">
+      <!-- Modal Close Button -->
+      <button type="button" class="booking-modal-close" id="booking-modal-close" aria-label="Close booking modal">
+        <i data-lucide="x"></i>
+      </button>
+
+      <!-- Modal Body -->
+      <div class="booking-modal-body">
+
+        <!-- Active Form View -->
+        <div class="booking-form-view" id="booking-form-view">
+          <div class="booking-modal-header">
+            <span class="booking-badge">RESERVATIONS</span>
+            <h3 class="booking-modal-title" id="booking-modal-title">Book a Table</h3>
+            <p class="booking-modal-desc">
+              Reserve your spot at CueNation. Select your game and preferred time below.
+            </p>
+          </div>
+
+          <form id="cuenation-booking-form" class="booking-form" novalidate>
+
+            <!-- Row 1: Customer Name & Mobile Number -->
+            <div class="form-row form-row-2">
+              <div class="form-group" id="group-name">
+                <label for="booking-customer-name" class="form-label">
+                  Customer Name <span class="required-star">*</span>
+                </label>
+                <div class="input-wrapper">
+                  <i data-lucide="user" class="input-icon"></i>
+                  <input type="text" id="booking-customer-name" name="customerName" class="form-input"
+                    placeholder="e.g. Aryan Sharma" autocomplete="name" required>
+                </div>
+                <span class="form-error-msg" id="name-error">Please enter your full name (minimum 2 characters).</span>
+              </div>
+
+              <div class="form-group" id="group-phone">
+                <label for="booking-customer-phone" class="form-label">
+                  Mobile Number <span class="required-star">*</span>
+                </label>
+                <div class="input-wrapper">
+                  <i data-lucide="phone" class="input-icon"></i>
+                  <input type="tel" id="booking-customer-phone" name="mobileNumber" class="form-input"
+                    placeholder="e.g. +91 98765 43210" autocomplete="tel" required>
+                </div>
+                <span class="form-error-msg" id="phone-error">Please enter a valid phone number (at least 10
+                  digits).</span>
+              </div>
+            </div>
+
+            <!-- Row 2: Game Selection (Pool vs Snooker) -->
+            <div class="form-group" id="group-game">
+              <label class="form-label">
+                Game Selection <span class="required-star">*</span>
+              </label>
+              <div class="game-selector-grid">
+
+                <label class="game-option-card is-selected" for="game-option-pool">
+                  <input type="radio" name="gameSelection" id="game-option-pool" value="Pool" checked>
+                  <div class="game-option-content">
+                    <div class="game-option-icon">
+                      <i data-lucide="circle-dot"></i>
+                    </div>
+                    <div class="game-option-text">
+                      <span class="game-option-title">Pool Table</span>
+                      <span class="game-option-sub">8-Ball &amp; 9-Ball championship tables</span>
+                    </div>
+                  </div>
+                  <div class="game-option-radio-indicator"></div>
+                </label>
+
+                <label class="game-option-card" for="game-option-snooker">
+                  <input type="radio" name="gameSelection" id="game-option-snooker" value="Snooker">
+                  <div class="game-option-content">
+                    <div class="game-option-icon">
+                      <i data-lucide="triangle"></i>
+                    </div>
+                    <div class="game-option-text">
+                      <span class="game-option-title">Snooker Table</span>
+                      <span class="game-option-sub">Full 12ft tournament cloth table</span>
+                    </div>
+                  </div>
+                  <div class="game-option-radio-indicator"></div>
+                </label>
+
+              </div>
+              <span class="form-error-msg" id="game-error">Please select your game.</span>
+            </div>
+
+            <!-- Row 3: Number of Players & Duration -->
+            <div class="form-row form-row-2">
+              <div class="form-group" id="group-players">
+                <label for="booking-players" class="form-label">
+                  Number of Players <span class="required-star">*</span>
+                </label>
+                <div class="input-wrapper">
+                  <i data-lucide="users" class="input-icon"></i>
+                  <select id="booking-players" name="numberOfPlayers" class="form-input form-select" required>
+                    <option value="1">1 Player (Solo Practice)</option>
+                    <option value="2" selected>2 Players (Match)</option>
+                    <option value="3">3 Players</option>
+                    <option value="4">4 Players (Doubles)</option>
+                    <option value="5">5+ Players (Group Gathering)</option>
+                  </select>
+                </div>
+                <span class="form-error-msg" id="players-error">Please specify player count.</span>
+              </div>
+
+              <div class="form-group" id="group-duration">
+                <label for="booking-duration" class="form-label">
+                  Duration <span class="required-star">*</span>
+                </label>
+                <div class="input-wrapper">
+                  <i data-lucide="clock" class="input-icon"></i>
+                  <select id="booking-duration" name="duration" class="form-input form-select" required>
+                    <option value="1 Hour">1 Hour</option>
+                    <option value="2 Hours" selected>2 Hours (Recommended)</option>
+                    <option value="3 Hours">3 Hours</option>
+                    <option value="4+ Hours">4+ Hours (VIP Salon)</option>
+                  </select>
+                </div>
+                <span class="form-error-msg" id="duration-error">Please select duration.</span>
+              </div>
+            </div>
+
+            <!-- Row 4: Booking Date & Preferred Time Slot -->
+            <div class="form-row form-row-2">
+              <div class="form-group" id="group-date">
+                <label for="booking-date" class="form-label">
+                  Booking Date <span class="required-star">*</span>
+                </label>
+                <div class="input-wrapper">
+                  <i data-lucide="calendar" class="input-icon"></i>
+                  <input type="date" id="booking-date" name="bookingDate" class="form-input" required>
+                </div>
+                <span class="form-error-msg" id="date-error">Please choose a valid present or future date.</span>
+              </div>
+
+              <div class="form-group" id="group-timeslot">
+                <label for="booking-timeslot" class="form-label">
+                  Preferred Time Slot <span class="required-star">*</span>
+                </label>
+                <div class="input-wrapper">
+                  <i data-lucide="watch" class="input-icon"></i>
+                  <select id="booking-timeslot" name="preferredTimeSlot" class="form-input form-select" required>
+                    <option value="" disabled selected>Select Time Slot</option>
+                    <optgroup label="Afternoon Slots (11 AM — 4 PM)">
+                      <option value="11:00 AM — 12:00 PM">11:00 AM — 12:00 PM</option>
+                      <option value="12:00 PM — 01:00 PM">12:00 PM — 01:00 PM</option>
+                      <option value="01:00 PM — 02:00 PM">01:00 PM — 02:00 PM</option>
+                      <option value="02:00 PM — 03:00 PM">02:00 PM — 03:00 PM</option>
+                      <option value="03:00 PM — 04:00 PM">03:00 PM — 04:00 PM</option>
+                    </optgroup>
+                    <optgroup label="Evening Slots (4 PM — 9 PM)">
+                      <option value="04:00 PM — 05:00 PM">04:00 PM — 05:00 PM</option>
+                      <option value="05:00 PM — 06:00 PM">05:00 PM — 06:00 PM</option>
+                      <option value="06:00 PM — 07:00 PM">06:00 PM — 07:00 PM</option>
+                      <option value="07:00 PM — 08:00 PM">07:00 PM — 08:00 PM</option>
+                      <option value="08:00 PM — 09:00 PM">08:00 PM — 09:00 PM</option>
+                    </optgroup>
+                    <optgroup label="Night Slots (9 PM — 1 AM)">
+                      <option value="09:00 PM — 10:00 PM">09:00 PM — 10:00 PM</option>
+                      <option value="10:00 PM — 11:00 PM">10:00 PM — 11:00 PM</option>
+                      <option value="11:00 PM — 12:00 AM">11:00 PM — 12:00 AM</option>
+                    </optgroup>
+                  </select>
+                </div>
+                <span class="form-error-msg" id="timeslot-error">Please select your preferred slot.</span>
+              </div>
+            </div>
+
+            <!-- Form Actions -->
+            <div class="booking-form-footer">
+              <button type="submit" class="btn btn-pill-champagne booking-submit-btn" id="booking-submit-btn">
+                <span>Confirm Reservation Request</span>
+                <span class="btn-arrow">&rarr;</span>
+              </button>
+              <p class="booking-disclaimer">
+                <i data-lucide="shield-check"
+                  style="width: 14px; height: 14px; display: inline-block; vertical-align: middle; margin-right: 4px;"></i>
+                Frontend ready for Node.js &amp; MongoDB backend integration. No live database writes until backend is
+                connected.
+              </p>
+            </div>
+
+          </form>
+        </div>
+
+        <!-- Submission Feedback View -->
+        <div class="booking-success-view" id="booking-success-view" style="display: none;">
+          <div class="success-icon-badge">
+            <i data-lucide="check" style="width: 34px; height: 34px;"></i>
+          </div>
+
+          <span class="booking-badge">REQUEST LOGGED</span>
+          <h3 class="booking-modal-title">Reservation Request Received</h3>
+          <p class="booking-modal-desc" id="booking-success-summary-desc">
+            Thank you! Your booking request details have been validated and formatted into a structured payload. Our
+            concierge team will reach out to confirm table availability.
+          </p>
+
+          <!-- Structured Details Card -->
+          <div class="booking-details-summary" id="booking-details-summary">
+            <!-- Populated via JavaScript -->
+          </div>
+
+          <div class="booking-backend-notice">
+            <span class="backend-notice-tag">BACKEND INTEGRATION READY</span>
+            <p>
+              Payload dispatched to <code>submitBookingToBackend()</code>. Ready to pipe directly into an Express
+              <code>POST /api/bookings</code> endpoint and MongoDB document collection.
+            </p>
+          </div>
+
+          <div class="success-actions">
+            <button type="button" class="btn btn-pill-champagne" id="booking-success-close-btn"
+              style="flex: 1; justify-content: center;">
+              <span>Done</span>
+            </button>
+            <button type="button" class="btn btn-pill-outline" id="booking-reset-btn"
+              style="flex: 1; justify-content: center;">
+              <span>Book Another Table</span>
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       Vendor Dependencies (Three.js r128, GSAP 3, ScrollTrigger, Lucide)
+       ========================================================================= -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Application Modules -->
+  <script src="js/three-scene.js"></script>
+  <script src="js/animations.js"></script>
+  <script src="js/interactions.js"></script>
+  <script src="js/main.js"></script>
+
+</body>
+
+</html>
