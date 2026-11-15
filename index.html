@@ -181,8 +181,7 @@
 
             <!-- Main Heading with Serif Italic Repeat. -->
             <h1 class="hero-main-heading">
-              Play. Eat.<br>
-              <span class="hero-italic">Repeat.</span>
+              Play. Eat. <span class="hero-italic">Repeat.</span>
             </h1>
 
             <!-- Descriptive Subtext -->
@@ -214,23 +213,16 @@
               <!-- Contact Drop Shadow with natural blur and depth -->
               <div class="ball-drop-shadow" aria-hidden="true"></div>
 
-              <!-- Interactive Hint Indicator -->
-              <div class="three-status-badge" aria-hidden="true">
-                <span class="indicator-pulse"></span>
-                <span>Interactive 3D &bull; Drag to Rotate</span>
-              </div>
-
             </div>
           </div>
 
         </div>
       </div>
 
-      <!-- Bottom Scroll Indicator -->
+      <!-- Bottom Scroll Indicator: Vertical Capsule with Downward Arrow -->
       <a href="#games" class="hero-scroll-indicator" aria-label="Scroll down to explore">
-        <span class="scroll-text">Scroll</span>
-        <div class="scroll-mouse" aria-hidden="true">
-          <div class="scroll-wheel"></div>
+        <div class="scroll-capsule" aria-hidden="true">
+          <span class="scroll-arrow">&darr;</span>
         </div>
       </a>
 
@@ -266,14 +258,18 @@
               <div class="game-card-content">
                 <div class="game-card-info">
                   <div class="game-card-icon" aria-hidden="true">
-                    <i data-lucide="circle-dot"></i>
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#E8BD91" stroke-width="1.8">
+                      <circle cx="8" cy="8" r="4.2" />
+                      <circle cx="16" cy="8" r="4.2" />
+                      <circle cx="12" cy="15.8" r="4.2" />
+                    </svg>
                   </div>
-                  <h3 class="game-card-title">Pool Tables.</h3>
+                  <h3 class="game-card-title">Pool Tables</h3>
                 </div>
 
                 <a href="#contact" class="game-card-btn" aria-label="Book Pool Table" data-open-booking
                   data-game="Pool">
-                  <i data-lucide="arrow-up-right"></i>
+                  <span class="btn-arrow" aria-hidden="true">&rarr;</span>
                 </a>
               </div>
             </article>
@@ -289,14 +285,22 @@
               <div class="game-card-content">
                 <div class="game-card-info">
                   <div class="game-card-icon" aria-hidden="true">
-                    <i data-lucide="triangle"></i>
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#E8BD91" stroke-width="1.8">
+                      <polygon points="12,3 3,19 21,19" stroke-linejoin="round" />
+                      <circle cx="12" cy="9.5" r="1.4" fill="#E8BD91" />
+                      <circle cx="9.8" cy="13.2" r="1.4" fill="#E8BD91" />
+                      <circle cx="14.2" cy="13.2" r="1.4" fill="#E8BD91" />
+                      <circle cx="7.6" cy="16.8" r="1.4" fill="#E8BD91" />
+                      <circle cx="12" cy="16.8" r="1.4" fill="#E8BD91" />
+                      <circle cx="16.4" cy="16.8" r="1.4" fill="#E8BD91" />
+                    </svg>
                   </div>
-                  <h3 class="game-card-title">Snooker Tables.</h3>
+                  <h3 class="game-card-title">Snooker Tables</h3>
                 </div>
 
                 <a href="#contact" class="game-card-btn" aria-label="Book Snooker Table" data-open-booking
                   data-game="Snooker">
-                  <i data-lucide="arrow-up-right"></i>
+                  <span class="btn-arrow" aria-hidden="true">&rarr;</span>
                 </a>
               </div>
             </article>
@@ -327,19 +331,14 @@
           <!-- RIGHT: Content & Decorative Abstract Circular Artwork (~45%) -->
           <div class="cafe-content-col">
 
-            <!-- Decorative Abstract Circular Line Artwork -->
+            <!-- Decorative Abstract Circular Line Arcs -->
             <div class="cafe-abstract-artwork" aria-hidden="true">
-              <svg width="420" height="420" viewBox="0 0 420 420" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="210" cy="210" r="200" stroke="#E8BD91" stroke-width="1" stroke-dasharray="4 6"
-                  opacity="0.22" />
-                <circle cx="210" cy="210" r="160" stroke="#E8BD91" stroke-width="1.2" opacity="0.16" />
-                <circle cx="210" cy="210" r="120" stroke="#E8BD91" stroke-width="0.8" stroke-dasharray="3 5"
-                  opacity="0.2" />
-                <circle cx="210" cy="210" r="80" stroke="#E8BD91" stroke-width="1.4" opacity="0.14" />
-                <circle cx="210" cy="210" r="40" stroke="#E8BD91" stroke-width="0.7" opacity="0.28" />
-                <circle cx="210" cy="50" r="4" fill="#E8BD91" opacity="0.4" />
-                <circle cx="370" cy="210" r="3" fill="#E8BD91" opacity="0.3" />
-                <circle cx="100" cy="300" r="2.5" fill="#E8BD91" opacity="0.35" />
+              <svg width="480" height="480" viewBox="0 0 480 480" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="480" cy="480" r="440" stroke="#1d5c3f" stroke-width="1.5" opacity="0.6" />
+                <circle cx="480" cy="480" r="360" stroke="#267852" stroke-width="1.5" opacity="0.5" />
+                <circle cx="480" cy="480" r="280" stroke="#339969" stroke-width="1.2" opacity="0.45" />
+                <circle cx="480" cy="480" r="200" stroke="#40bf83" stroke-width="1.0" opacity="0.4" />
+                <circle cx="480" cy="480" r="120" stroke="#E8BD91" stroke-width="0.8" opacity="0.35" />
               </svg>
             </div>
 
@@ -440,27 +439,22 @@
           <h2 class="gallery-heading">A Glimpse of CueNation</h2>
         </div>
 
-        <!-- Right: Action Link & Prev/Next Navigation Controls -->
+        <!-- Right: Action Link -->
         <div class="gallery-header-right">
           <a href="#contact" class="gallery-action-link">
             <span>View Gallery</span>
             <span class="btn-arrow" aria-hidden="true">&rarr;</span>
           </a>
-
-          <div class="gallery-nav-controls" aria-label="Gallery Controls">
-            <button class="gallery-nav-btn prev" aria-label="Scroll to previous image" id="gallery-prev">
-              <i data-lucide="chevron-left"></i>
-            </button>
-            <button class="gallery-nav-btn next" aria-label="Scroll to next image" id="gallery-next">
-              <i data-lucide="chevron-right"></i>
-            </button>
-          </div>
         </div>
 
       </div>
 
-      <!-- Horizontal Scrolling Gallery Track -->
+      <!-- Horizontal Scrolling Gallery Track with Side Controls -->
       <div class="gallery-track-outer">
+        <button class="gallery-nav-btn prev gallery-side-prev" aria-label="Scroll to previous image" id="gallery-prev">
+          <i data-lucide="chevron-left"></i>
+        </button>
+
         <div class="gallery-track" id="gallery-track" role="region" aria-label="CueNation Photo Gallery">
 
           <!-- IMAGE 1: Pool Table Area -->
@@ -470,12 +464,6 @@
               <img src="assets/images/gallery-1-pool.jpg"
                 alt="Championship Pool Table Area under warm focused canopy lights" class="gallery-img" width="600"
                 height="400" loading="lazy" decoding="async">
-              <div class="gallery-item-overlay">
-                <span class="gallery-expand-pill">
-                  <i data-lucide="maximize-2"></i>
-                  <span>Expand</span>
-                </span>
-              </div>
             </div>
           </div>
 
@@ -485,12 +473,6 @@
             <div class="gallery-image-wrapper">
               <img src="assets/images/gallery-2-cafe.jpg" alt="Contemporary Café Seating with artisanal espresso bar"
                 class="gallery-img" width="600" height="400" loading="lazy" decoding="async">
-              <div class="gallery-item-overlay">
-                <span class="gallery-expand-pill">
-                  <i data-lucide="maximize-2"></i>
-                  <span>Expand</span>
-                </span>
-              </div>
             </div>
           </div>
 
@@ -501,12 +483,6 @@
               <img src="assets/images/gallery-3-lounge.jpg"
                 alt="Luxury Billiards Lounge Interior with plush leather club seating" class="gallery-img" width="600"
                 height="400" loading="lazy" decoding="async">
-              <div class="gallery-item-overlay">
-                <span class="gallery-expand-pill">
-                  <i data-lucide="maximize-2"></i>
-                  <span>Expand</span>
-                </span>
-              </div>
             </div>
           </div>
 
@@ -517,12 +493,6 @@
               <img src="assets/images/gallery-4-snooker.jpg"
                 alt="Professional Riley Aristocrat 12ft Snooker Table with competition cloth" class="gallery-img"
                 width="600" height="400" loading="lazy" decoding="async">
-              <div class="gallery-item-overlay">
-                <span class="gallery-expand-pill">
-                  <i data-lucide="maximize-2"></i>
-                  <span>Expand</span>
-                </span>
-              </div>
             </div>
           </div>
 
@@ -533,16 +503,14 @@
               <img src="assets/images/gallery-5-restaurant.jpg"
                 alt="Atmospheric Restaurant Seating with handcrafted tables and ambient lighting" class="gallery-img"
                 width="600" height="400" loading="lazy" decoding="async">
-              <div class="gallery-item-overlay">
-                <span class="gallery-expand-pill">
-                  <i data-lucide="maximize-2"></i>
-                  <span>Expand</span>
-                </span>
-              </div>
             </div>
           </div>
 
         </div>
+
+        <button class="gallery-nav-btn next gallery-side-next" aria-label="Scroll to next image" id="gallery-next">
+          <i data-lucide="chevron-right"></i>
+        </button>
       </div>
 
     </section>
@@ -570,7 +538,8 @@
 
         <!-- Image & Caption Container -->
         <div class="lightbox-content">
-          <img src="assets/images/gallery-1-pool.jpg" alt="Full-screen photo view" class="lightbox-img" id="lightbox-img" width="1200" height="800">
+          <img src="assets/images/gallery-1-pool.jpg" alt="Full-screen photo view" class="lightbox-img"
+            id="lightbox-img" width="1200" height="800">
           <div class="lightbox-footer">
             <span class="lightbox-caption" id="lightbox-caption"></span>
             <span class="lightbox-counter" id="lightbox-counter">01 / 05</span>
@@ -631,11 +600,10 @@
 
                 <div class="testimonial-author">
                   <div class="author-avatar" aria-hidden="true">
-                    <span>RM</span>
+                    <img src="assets/images/rohan-avatar.jpg" alt="Rohan Mehta" class="author-avatar-img" width="40" height="40" loading="lazy">
                   </div>
                   <div class="author-meta">
                     <h3 class="author-name">Rohan Mehta</h3>
-                    <span class="author-role">Verified Guest</span>
                   </div>
                 </div>
               </article>
@@ -729,7 +697,6 @@
           <!-- Content Grid: Left Text & Right Action -->
           <div class="cta-content">
             <div class="cta-text-side">
-              <span class="cta-pill-label">EXPERIENCE CUENATION</span>
               <h2 class="cta-heading">Ready to Play?</h2>
               <p class="cta-description">
                 Book your table now and enjoy the ultimate games + caf&eacute; experience.

@@ -40,11 +40,11 @@
   }
 
   .gallery-item {
-    flex: 0 0 390px;
+    flex: 0 0 280px;
   }
 
   .gallery-image-wrapper {
-    height: 340px;
+    height: 185px;
   }
 
   .features-grid {
@@ -237,11 +237,11 @@
   }
 
   .gallery-item {
-    flex: 0 0 350px;
+    flex: 0 0 260px;
   }
 
   .gallery-image-wrapper {
-    height: 310px;
+    height: 175px;
   }
 
   /* Lightbox on Tablets */
@@ -435,12 +435,12 @@
   }
 
   .gallery-item {
-    flex: 0 0 290px;
-    border-radius: 16px;
+    flex: 0 0 240px;
+    border-radius: 12px;
   }
 
   .gallery-image-wrapper {
-    height: 260px;
+    height: 160px;
   }
 
   .gallery-item-overlay {
